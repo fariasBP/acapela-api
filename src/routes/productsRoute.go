@@ -7,5 +7,7 @@ import (
 )
 
 func ProductsRoute(e *echo.Echo) {
-	e.POST("/createProduct", controllers.CreateProduct, middlewares.ValidateToken, middlewares.IsAdminOrEmpl)
+	router := e.Group("/products", middlewares.ValidateToken)
+	router.POST("/create", controllers.CreateProduct,
+		middlewares.IsAdminOrEmpl)
 }

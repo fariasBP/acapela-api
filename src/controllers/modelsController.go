@@ -7,14 +7,20 @@ import (
 )
 
 func CreateModel(c echo.Context) error {
+	// extrayendo values
 	name := c.FormValue("name")
-
-	existE := models.ExistsNameProductModel(name)
-	if existE {
-		return c.JSON(400, config.SetResError(400, "Error: name product model is already registered.", ""))
+	idKind := c.FormValue("kind")
+	// verificando si exsite en la BBDD
+	exist := models.ExistsNameProductModel(name)
+	if exist {
+		return c.JSON(400, config.SetResError(400, "Error: name productModel is already created.", ""))
 	}
-
-	err := models.NewProductModel(name)
+	exist = models.VerifyKindId(idKind)
+	if !exist {
+		return c.JSON(400, config.SetResError(400, "Error: id Kind does not exist.", ""))
+	}
+	// creando nuevo modelo en la BBDD
+	err := models.NewProductModel(name, idKind)
 	if err != nil {
 		return c.JSON(500, config.SetResError(500, "error: not created new product model", err.Error()))
 	}
@@ -23,8 +29,8 @@ func CreateModel(c echo.Context) error {
 func GetAllModels(c echo.Context) error {
 	models, err := models.GetAllModels()
 	if err != nil {
-		return c.JSON(500, config.SetResError(500, "error get all models", err.Error()))
+		return c.JSON(500, config.SetResError(500, "error: not get all models", err.Error()))
 	}
 
-	return c.JSON(200, config.SetResJson(200, "todo ok", models))
+	return c.JSON(200, config.SetResJson(200, "get all models successful", models))
 }

@@ -12,20 +12,19 @@ import (
 type ProductModel struct {
 	ID   primitive.ObjectID `bson:"_id,omitempty"`
 	Name string             `json:"name" bson:"name,omitempty"`
-	Lot  uint16             `json:"lot" bson:"lot,omitempty"`
-	Type []string           `json:"type" bson:"type,omitempty"`
+	Kind string             `json:"kind" bson:"kind,omitempty"`
 }
 
-func NewProductModel(name string) error {
+func NewProductModel(name string, idKind string) error {
 	newModel := &ProductModel{
 		Name: name,
-		Lot:  0,
+		Kind: idKind,
 	}
-
+	// conectando a la BBDD
 	ctx, client, coll := config.ConnectColl("models")
 	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
-
+	// insertando en la BBDD
 	_, err := coll.InsertOne(context.Background(), newModel)
 	return err
 }

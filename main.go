@@ -29,6 +29,7 @@ func main() {
 	routes.UserRoute(e)
 	routes.ProductsRoute(e)
 	routes.ModelRoute(e)
+	routes.KindRoute(e)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
