@@ -58,3 +58,22 @@ func GetAllModels() ([]ProductModel, error) {
 
 	return data, nil
 }
+func VerfyIdModel(id string) (b bool) {
+	ctx, client, coll := config.ConnectColl("models")
+	defer fmt.Println("Disconnected DB")
+	defer client.Disconnect(ctx)
+
+	b = true
+
+	ObjId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		b = false
+	}
+
+	model := &ProductModel{}
+	err = coll.FindOne(ctx, bson.M{"_id": ObjId}).Decode(model)
+	if err != nil {
+		b = false
+	}
+	return
+}

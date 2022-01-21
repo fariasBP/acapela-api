@@ -41,9 +41,12 @@ func CreateProduct(c echo.Context) error {
 		return c.JSON(400, config.SetRes(400, "error: models ID format incorrect"))
 	}
 	// verficar ID's de los modelos
+	existModel := models.VerfyIdModel(modelsArr[0])
+	if !existModel {
+		return c.JSON(400, config.SetRes(500, "error: model ID do not exist"))
+	}
 
 	// guardar nuevo producto en BBDD
-	// err := models.NewProductModel(name, talla, uint8(larTorso), conPecho, conCintura, conCadera, conSisa, larHombro, larManga)
 	err = models.NewProduct(kind, uint(price), uint(pricemin), uint8(gender),
 		photo, photosArr, modelsArr, talla, uint8(larTorso), uint8(conPecho),
 		uint8(conCintura), uint8(conCadera), uint8(conSisa), uint8(larHombro),
@@ -52,4 +55,13 @@ func CreateProduct(c echo.Context) error {
 		return c.JSON(500, config.SetResError(500, "Error: not created product", err.Error()))
 	}
 	return c.JSON(200, "creating product")
+}
+func GetAllProducts(c echo.Context) error {
+
+	products, err := models.GetAllProducts()
+	if err != nil {
+		c.JSON(500, config.SetResError(500, "error: not get products", err.Error()))
+	}
+
+	return c.JSON(200, config.SetResJson(200, "get all products successful", products))
 }

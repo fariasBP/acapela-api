@@ -6,6 +6,7 @@ import (
 
 	"github.com/fariasBP/acapela-api/src/config"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type Product struct {
@@ -69,4 +70,22 @@ func NewProduct(kind string, price, pricemin uint, gender uint8,
 
 	_, err := coll.InsertOne(context.Background(), newProduct)
 	return err
+}
+func GetAllProducts() ([]Product, error) {
+	ctx, client, coll := config.ConnectColl("products")
+	defer fmt.Println("Disconnected DB")
+	defer client.Disconnect(ctx)
+
+	cursor, err := coll.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var products []Product
+
+	if err = cursor.All(ctx, &products); err != nil {
+		return nil, err
+	}
+	return products, nil
 }
