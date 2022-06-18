@@ -7,8 +7,8 @@ import (
 )
 
 func AuthRoute(e *echo.Echo) {
-
 	e.POST("/signup", controllers.Signup, middlewares.SingupValidate)
 	e.POST("/login", controllers.Login, middlewares.LoginValidate)
+	e.POST("/register", controllers.RegisterUser, middlewares.ValidateToken, middlewares.IsAdminOrEmpl, middlewares.RegisterValidator)
 	e.PUT("/logout", controllers.Logout, middlewares.ValidateToken)
 }

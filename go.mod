@@ -45,4 +45,7 @@ require (
 	github.com/leodido/go-urn v1.2.1 // indirect
 )
 
-require github.com/go-ozzo/ozzo-validation v3.6.0+incompatible // indirect
+require (
+	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible // indirect
+	github.com/sethvargo/go-password v0.2.0 // indirect
+)

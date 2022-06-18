@@ -33,19 +33,21 @@ func CreateToken(id string, rol uint8) (string, time.Time, error) {
 
 func ValidateToken(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		// Verificando que la cookie token exista
-		tkn, err := c.Cookie("token")
-		if err != nil {
-			return c.JSON(400, "error: token not provided")
+		// obteniedo el header access-token
+		var tkn string = ""
+		for name, values := range c.Request().Header {
+			if name == "Access-Token" {
+				tkn = string(values[0])
+				break
+			}
 		}
-		receivedToken := tkn.Value
-		if receivedToken == "" {
+		if tkn == "" {
 			return c.JSON(400, "error: token not provided")
 		}
 		// verificando token
 		secret := []byte(SECRET)
 		claims := &JwtCustomClaims{}
-		token, err := jwt.ParseWithClaims(receivedToken, claims, func(t *jwt.Token) (interface{}, error) {
+		token, err := jwt.ParseWithClaims(tkn, claims, func(t *jwt.Token) (interface{}, error) {
 			return secret, nil
 		})
 		if err != nil {
@@ -60,7 +62,7 @@ func ValidateToken(next echo.HandlerFunc) echo.HandlerFunc {
 		// creando supervariables echo
 		c.Set("id", claims.Id)
 		c.Set("rol", claims.Rol)
-		// siguiente
+		// fin del middleware
 		return next(c)
 	}
 }

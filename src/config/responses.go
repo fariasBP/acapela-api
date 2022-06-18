@@ -1,5 +1,7 @@
 package config
 
+import "time"
+
 // type Error interface {
 // 	Error() string
 // }
@@ -18,6 +20,12 @@ type (
 		Code int         `json:"code"`
 		Msg  string      `json:"msg"`
 		Data interface{} `json:"data"`
+	}
+	resToken struct {
+		Code    int       `json:"code"`
+		Msg     string    `json:"msg"`
+		Token   string    `json:"token"`
+		Expires time.Time `json:"expires"`
 	}
 )
 
@@ -43,6 +51,15 @@ func SetResJson(code int, msg string, json interface{}) *resJson {
 		Code: code,
 		Msg:  msg,
 		Data: json,
+	}
+	return d
+}
+func SetResToken(code int, msg string, token string, expires time.Time) *resToken {
+	d := &resToken{
+		Code:    code,
+		Msg:     msg,
+		Token:   token,
+		Expires: expires,
 	}
 	return d
 }
