@@ -6,6 +6,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func UserRoute(e *echo.Echo) {
-	e.GET("/users/:user", controllers.GetUser, middlewares.ValidateToken)
+func User(e *echo.Echo) {
+	// e.POST("/user", func(c echo.Context) error {
+	// 	return c.JSON(200, "sdfasdf")
+	// })
+	router := e.Group("user", middlewares.ValidateToken)
+	// router.POST("", controllers.GetUser)
+	router.POST("/user", controllers.GetAllUsers)
 }

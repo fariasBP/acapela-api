@@ -2,108 +2,211 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
-	"net/http"
-	"strconv"
-	"time"
+	"strings"
 
 	"github.com/fariasBP/acapela-api/src/config"
 	"github.com/fariasBP/acapela-api/src/middlewares"
 	"github.com/fariasBP/acapela-api/src/models"
+	"github.com/fonini/go-capitalize/capitalize"
 	"github.com/labstack/echo/v4"
 	"github.com/sethvargo/go-password/password"
-	"golang.org/x/crypto/bcrypt"
 )
 
-func Signup(c echo.Context) error {
-	// obteniendo body json
-	body := make(map[string]string)
-	json.NewDecoder(c.Request().Body).Decode(&body)
-	name, lastname, email, pwd, code, phoneString := body["name"], body["lastname"], body["email"], body["password"], body["code"], body["phone"]
-	// convertir el phone a tipo int
-	phone, _ := strconv.Atoi(phoneString)
-	// verificar que no exista un email igual
-	existEmail := models.ExistsEmail(email) // true si existe
-	if existEmail {
-		return c.JSON(400, config.SetResError(400, "Error: Email is already registered.", ""))
+// ---- LOGEADORES ----
+// ---- obtener codigo ----
+func GetCodeLogin(c echo.Context) error {
+	// obteniendo variables
+	body := &models.User{}
+	d := c.Request().Body
+	_ = json.NewDecoder(d).Decode(body)
+	defer d.Close()
+	// verificando que existe el usuario
+	user, err := models.GetUserByPhone(body.CodePhone, body.Phone)
+	if err != nil {
+		return c.JSON(500, config.SetResError(500, "Error: no existe el numero de telefono", err.Error()))
 	}
-	// verificar que no exista un code + phone iguales
-	existPhone := models.ExistsPhone(code, phone)
-	if existPhone {
-		return c.JSON(400, config.SetResError(400, "Error: Phone is already registered.", ""))
+	// verificando que el codigo despues de un tiempo (despues de 1 hora)
+	// if year := user.CodeDate.Year(); year != 1 {
+	// 	_, month, day := user.CodeDate.Date()
+	// 	year2, month2, day2 := time.Now().UTC().Date()
+	// 	if year == year2 && month == month2 && day == day2 {
+	// 		hour, minNext1hour := user.CodeDate.Hour(), user.CodeDate.Add(time.Hour).Minute()
+	// 		hourCurrent, minCurrent := time.Now().UTC().Hour(), time.Now().UTC().Minute()
+	// 		if hour >= hourCurrent {
+	// 			if hour == hourCurrent+1 && minCurrent > minNext1hour {
+
+	// 			} else {
+	// 				return c.JSON(400, config.SetRes(400, "Error: ya se ha pedido codigo espere 1 HORA para pedir otro por favor"))
+	// 			}
+	// 		}
+	// 	}
+	// }
+	// creando codigo
+	cod, err := password.Generate(5, 2, 0, true, false)
+	if err != nil {
+		return c.JSON(500, config.SetResError(500, "Error: al crear codigo", err.Error()))
 	}
-	// Encriptar contraseña
-	pwdHashB, errHashing := bcrypt.GenerateFromPassword([]byte(pwd), 10)
-	if errHashing != nil {
-		return c.JSON(500, config.SetResError(500, "Error: Encryption has failed", errHashing.Error()))
+	// insertando code a user
+	_, err = models.GetCode(user.ID, cod)
+	if err != nil {
+		return c.JSON(500, config.SetResError(500, "Error: al insertar codigo a BBDD", err.Error()))
 	}
-	pwdH := string(pwdHashB)
-	// crear ususario en BBDD
-	errc := models.NewUser(name, lastname, email, pwdH, 3)
-	if errc != nil {
-		return c.JSON(500, config.SetResError(500, "Error: Do not create user", errc.Error()))
+	// enviar mensaje del codigo por whatsapp
+	err = middlewares.SendCodeMessage(body.CodePhone, body.Phone, cod)
+	if err != nil {
+		return c.JSON(500, config.SetResError(500, "Error: al enviar codigo via whatsapp", err.Error()))
+
 	}
-	// comunicar que se ha creado
-	return c.JSON(200, config.SetRes(200, "Created user"))
+
+	return c.JSON(200, config.SetResJson(200, "Codigo creado", map[string]interface{}{"Code": cod, "date": user.CodeDate.Local()}))
 }
+
+// ---- login ----
 func Login(c echo.Context) error {
 	// obteniendo variables
-	body := &middlewares.LoginValues{}
+	body := &models.User{}
 	d := c.Request().Body
 	_ = json.NewDecoder(d).Decode(body)
 	defer d.Close()
 	// buscar usuario por numero
-	user, err := models.GetUserByPhone(body.Code, body.Phone)
+	user, err := models.GetUserByPhone(body.CodePhone, body.Phone)
 	if err != nil {
-		return c.JSON(400, config.SetResError(200, "user not found", err.Error()))
+		return c.JSON(404, config.SetResError(404, "Error: Numero de telefono no registrado.", err.Error()))
 	}
-	// desincriptar y comparar la contraseña
-	compareErr := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password))
-	if compareErr != nil {
-		return c.JSON(400, config.SetResError(400, "password incorrect", compareErr.Error()))
+	if user.Code != body.Code {
+		return c.JSON(400, config.SetRes(400, "Error: Codigo incorrecto"))
 	}
 	// crear JWT
 	tokenString, expiresJWT, tokenErr := middlewares.CreateToken(user.ID.Hex(), uint8(user.Rol))
 	if tokenErr != nil {
-		return c.JSON(500, config.SetResError(500, "token do not created", tokenErr.Error()))
+		return c.JSON(500, config.SetResError(500, "token no creado", tokenErr.Error()))
 	}
 
-	return c.JSON(200, config.SetResToken(400, "token created, expires in: ", tokenString, expiresJWT))
+	return c.JSON(200, config.SetResToken(200, "Se inicio session correctamente", tokenString, expiresJWT))
 }
-func RegisterUser(c echo.Context) error {
+
+// ---- REGISTRADORES ----
+// ---- auto registrador ----
+// func Signup(c echo.Context) error {
+// 	// obteniendo variables
+// 	body := &middlewares.SignupValues{}
+// 	d := c.Request().Body
+// 	_ = json.NewDecoder(d).Decode(body)
+// 	defer d.Close()
+// 	// verificar que no exista un code + phone iguales
+// 	existPhone := models.ExistsPhone(body.Code, body.Phone)
+// 	if existPhone {
+// 		return c.JSON(400, config.SetRes(400, "Error: El telefono ya ha sido registrado."))
+// 	}
+// 	// Encriptar contraseña
+// 	pwdHashB, errHashing := bcrypt.GenerateFromPassword([]byte(body.Password), 10)
+// 	if errHashing != nil {
+// 		return c.JSON(500, config.SetResError(500, "Error: La encriptación ha fallado.", errHashing.Error()))
+// 	}
+// 	pwdH := string(pwdHashB)
+// 	// crear ususario en BBDD
+// 	err := models.AutoClientRegistrar(body.Name, body.LastName, pwdH, body.Code, body.Phone)
+// 	if err != nil {
+// 		return c.JSON(500, config.SetResError(500, "Error: No se ha creado al usuario.", err.Error()))
+// 	}
+// 	// comunicar que se ha creado
+// 	return c.JSON(200, config.SetRes(200, "Usuario Registrado"))
+// }
+
+// ---- registrador de clientes ----
+func ClientRegistrar(c echo.Context) error {
 	// obteniendo variables
-	body := &middlewares.RegisterValues{}
+	body := &models.User{}
 	d := c.Request().Body
 	_ = json.NewDecoder(d).Decode(body)
 	defer d.Close()
-	fmt.Println(body)
 	// verificar que no exista un code + phone iguales
-	existPhone := models.ExistsPhone(body.Code, body.Phone)
+	existPhone := models.ExistsPhone(body.CodePhone, body.Phone)
 	if existPhone {
-		return c.JSON(400, config.SetRes(400, "Error: Phone is already registered."))
+		return c.JSON(400, config.SetRes(400, "Error: El telefono ya ha sido registrado."))
 	}
-	//Generar primera contraseña
-	// Generate a password that is 8 characters long with 10 digits, 10 symbols,
-	// allowing upper and lower case letters, disallowing repeat characters.
-	firstPwd, err := password.Generate(8, 3, 0, false, true)
+	// crear usuario en BBDD
+	err := models.ClientRegistrar(strings.TrimSpace(body.Name), body.CodePhone, body.Phone)
 	if err != nil {
-		return c.JSON(400, config.SetResError(200, "first password don't create", err.Error()))
+		return c.JSON(500, config.SetResError(500, "Error: No se ha registrado al cliente", err.Error()))
+	}
+	// // enviar el primer mensaje whatsapp
+	name, err := capitalize.Capitalize(body.Name)
+	if err != nil {
+		name = body.Name
+	}
+	// to := body.Code + strconv.Itoa(body.Phone)
+	// err = middlewares.SendFirstMessageWelcome(to, name)
+	// if err != nil {
+	// 	return c.JSON(200, config.SetResError(500, "user registered but don't send first message whatsapp", err.Error()))
+	// }
+	// enviar el mesaje de bienvenida
+	err = middlewares.SendWelcomeMessage(body.CodePhone, body.Phone, name)
+	if err != nil {
+		return c.JSON(200, config.SetResError(500, "Error: ususario fue registrado en BBDD pero no se envio el mensaje de bienvenida", err.Error()))
+	}
+
+	return c.JSON(200, config.SetRes(200, "Cliente registrado."))
+}
+
+// ---- registrador de empleados ----
+func EmployeRegistrar(c echo.Context) error {
+	// obteniendo variables
+	body := &models.User{}
+	d := c.Request().Body
+	_ = json.NewDecoder(d).Decode(body)
+	defer d.Close()
+	// verificar que no exista un code + phone iguales
+	existPhone := models.ExistsPhone(body.CodePhone, body.Phone)
+	if existPhone {
+		return c.JSON(400, config.SetRes(400, "Error: El telefono ya ha sido registrado."))
 	}
 	// crear ususario en BBDD
-	errc := models.NewUserRegister(body.Name, body.Lastname, firstPwd, body.Code, body.Phone)
-	if errc != nil {
-		return c.JSON(500, config.SetResError(500, "Error: Do not create user register", errc.Error()))
+	err := models.EmployRegistrar(strings.TrimSpace(body.Name), body.CodePhone, body.Phone)
+	if err != nil {
+		return c.JSON(500, config.SetResError(500, "Error: No se ha registrado al empleado.", err.Error()))
 	}
-	// enviar el primer mensaje whatsapp
+	// // enviar el primer mensaje whatsapp
+	// name, err := capitalize.Capitalize(body.Name)
+	// if err != nil {
+	// 	name = body.Name
+	// }
+	// to := body.Code + strconv.Itoa(body.Phone)
+	// err = middlewares.SendFirstMessageWelcome(to, name)
+	// if err != nil {
+	// 	return c.JSON(200, config.SetResError(500, "user registered but don't send first message whatsapp", err.Error()))
+	// }
 
-	return c.JSON(200, config.SetRes(200, "user registered"))
+	return c.JSON(200, config.SetRes(200, "Empleado registrado."))
 }
-func Logout(c echo.Context) error {
-	c.SetCookie(&http.Cookie{
-		Name:    "token",
-		Value:   "",
-		Expires: time.Now().Add(0 * time.Millisecond),
-	})
 
-	return c.JSON(200, config.SetRes(200, "user logout"))
+// ---- registrador de empleados administrativos ----
+func AdminEmployeRegistrar(c echo.Context) error {
+	// obteniendo variables
+	body := &models.User{}
+	d := c.Request().Body
+	_ = json.NewDecoder(d).Decode(body)
+	defer d.Close()
+	// verificar que no exista un code + phone iguales
+	existPhone := models.ExistsPhone(body.CodePhone, body.Phone)
+	if existPhone {
+		return c.JSON(400, config.SetRes(400, "Error: El telefono ya ha sido registrado."))
+	}
+	// crear ususario en BBDD
+	err := models.AdminEmployRegistrar(strings.TrimSpace(body.Name), body.CodePhone, body.Phone)
+	if err != nil {
+		return c.JSON(500, config.SetResError(500, "Error: No se ha registrado al empleado.", err.Error()))
+	}
+	// // enviar el primer mensaje whatsapp
+	// name, err := capitalize.Capitalize(body.Name)
+	// if err != nil {
+	// 	name = body.Name
+	// }
+	// to := body.Code + strconv.Itoa(body.Phone)
+	// err = middlewares.SendFirstMessageWelcome(to, name)
+	// if err != nil {
+	// 	return c.JSON(200, config.SetResError(500, "user registered but don't send first message whatsapp", err.Error()))
+	// }
+
+	return c.JSON(200, config.SetRes(200, "Empleado administrativo registrado."))
 }

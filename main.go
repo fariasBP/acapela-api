@@ -2,10 +2,15 @@ package main
 
 import (
 	"fmt"
+	"log"
 
+	"github.com/fariasBP/acapela-api/src/config"
+	"github.com/fariasBP/acapela-api/src/middlewares"
 	"github.com/fariasBP/acapela-api/src/routes"
 	"github.com/go-playground/validator"
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 type CustomValidator struct {
@@ -23,13 +28,28 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 
 func main() {
 	e := echo.New()
+	// midlewares
+	e.Use(middleware.CORS())
+	middlewares.LoadEnvLocal()
+	// validador
 	e.Validator = &CustomValidator{validator: validator.New()}
+	// estableciendo rutas
 	routes.IndexRoute(e)
 	routes.AuthRoute(e)
-	routes.UserRoute(e)
-	routes.ProductsRoute(e)
+	routes.User(e)
+	routes.Product(e)
 	routes.ModelRoute(e)
 	routes.KindRoute(e)
-
-	e.Logger.Fatal(e.Start(":8080"))
+	routes.Notification(e)
+	routes.WPRoute(e)
+	routes.Files(e)
+	// iniciando server
+	err := godotenv.Load()
+	if err == nil {
+		fmt.Println("load env successful")
+		e.Logger.Fatal(e.Start(":3000"))
+	} else {
+		log.Fatal(config.SetResError(500, "NO SE PUEDE CARGAR VALORES ENV", err.Error()))
+	}
+	// e.Logger.Fatal(e.Start(":8080"))
 }

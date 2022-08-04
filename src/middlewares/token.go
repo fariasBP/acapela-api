@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"os"
 	"time"
 
 	"github.com/fariasBP/acapela-api/src/config"
@@ -14,11 +15,15 @@ type JwtCustomClaims struct {
 	jwt.StandardClaims
 }
 
-const SECRET = "secreto"
-
 func CreateToken(id string, rol uint8) (string, time.Time, error) {
-	expiresJWT := time.Now().Add(30 * time.Minute)
-	secret := []byte(SECRET)
+	// obteniendo secret de variable de entorno
+	secretVal, defined := os.LookupEnv("SECRET_JWT")
+	if !defined {
+		secretVal = "secreto"
+	}
+
+	expiresJWT := time.Now().Add(2 * 24 * time.Hour)
+	secret := []byte(secretVal)
 	claims := &JwtCustomClaims{
 		id,
 		rol,
@@ -41,23 +46,30 @@ func ValidateToken(next echo.HandlerFunc) echo.HandlerFunc {
 				break
 			}
 		}
-		if tkn == "" {
-			return c.JSON(400, "error: token not provided")
+		// if tkn == "" {
+		// 	return c.String(400, "error: token not provided")
+		// }
+		// fmt.Println("itrisdfL", tkn)
+
+		// obteniendo secret de variable de entorno
+		secretVal, defined := os.LookupEnv("SECRET_JWT")
+		if !defined {
+			secretVal = "secreto"
 		}
 		// verificando token
-		secret := []byte(SECRET)
+		secret := []byte(secretVal)
 		claims := &JwtCustomClaims{}
 		token, err := jwt.ParseWithClaims(tkn, claims, func(t *jwt.Token) (interface{}, error) {
 			return secret, nil
 		})
 		if err != nil {
 			if err == jwt.ErrSignatureInvalid {
-				return c.JSON(400, config.SetRes(400, "error: token unauthorized"))
+				return c.JSON(400, config.SetResError(400, "firma del token, no autorizado", err.Error()))
 			}
-			return c.JSON(400, config.SetRes(400, "error: token invalidate"))
+			return c.JSON(400, config.SetResError(400, "token invalido", err.Error()))
 		}
 		if !token.Valid {
-			return c.JSON(400, config.SetRes(400, "error: token unauthorized"))
+			return c.JSON(400, config.SetResError(400, "token no autorizado", ""))
 		}
 		// creando supervariables echo
 		c.Set("id", claims.Id)
@@ -67,21 +79,30 @@ func ValidateToken(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func IsAdmin(next echo.HandlerFunc) echo.HandlerFunc {
+func IsBoss(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		rol := c.Get("rol").(uint8)
 		if rol == 1 {
 			return next(c)
 		}
-		return c.JSON(400, config.SetRes(400, "error: user is not admin or empl"))
+		return c.JSON(400, config.SetRes(400, "Error: El usuario no es AdminBoss."))
 	}
 }
-func IsAdminOrEmpl(next echo.HandlerFunc) echo.HandlerFunc {
+func IsBossOrAdmin(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		rol := c.Get("rol").(uint8)
 		if rol == 1 || rol == 2 {
 			return next(c)
 		}
-		return c.JSON(400, config.SetRes(400, "error: user is not admin or empl"))
+		return c.JSON(400, config.SetRes(400, "Error: El usuario no es AdminBoss o AdminEmploye."))
+	}
+}
+func IsBossOrAdminOrEmpl(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		rol := c.Get("rol").(uint8)
+		if rol == 1 || rol == 2 || rol == 3 {
+			return next(c)
+		}
+		return c.JSON(400, config.SetRes(400, "Error: El usuario no es AdminBoss o AdminEmploye o Employe."))
 	}
 }

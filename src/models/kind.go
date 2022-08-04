@@ -10,13 +10,13 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-type KindProduct struct {
+type ProductKind struct {
 	ID   primitive.ObjectID `bson:"_id,omitempty"`
-	Name []string           `json:"name" bson:"name,omitempty"`
+	Name string             `json:"name" bson:"name,omitempty"`
 }
 
-func NewKindProduct(name []string) error {
-	newModel := &KindProduct{
+func NewProductKind(name string) error {
+	newModel := &ProductKind{
 		Name: name,
 	}
 
@@ -27,55 +27,81 @@ func NewKindProduct(name []string) error {
 	_, err := coll.InsertOne(context.Background(), newModel)
 	return err
 }
-
-// func ExistsNameKindProduct(name []string) (b bool) {
-// 	ctx, client, coll := config.ConnectColl("kinds")
-// 	defer fmt.Println("Disconnected DB")
-// 	defer client.Disconnect(ctx)
-
-// 	kindModel := &KindProduct{}
-// 	cursor, err := coll.Find(ctx, bson.M{})
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-
-// 	b = true
-// 	if err != nil {
-// 		b = false
-// 	}
-// 	return
-// }
-func GetAllKinds() ([]KindProduct, error) {
+func ExistsNameProductKind(name string) (b bool) {
 	ctx, client, coll := config.ConnectColl("kinds")
 	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 
+	kindProd := &ProductKind{}
+
+	err := coll.FindOne(ctx, bson.M{"name": name}).Decode(kindProd)
+	b = true
+	if err != nil {
+		b = false
+	}
+	return
+}
+func GetAllKinds() ([]ProductKind, error) {
+	// conectado a BBDD
+	ctx, client, coll := config.ConnectColl("kinds")
+	defer fmt.Println("Disconnected DB")
+	defer client.Disconnect(ctx)
+	// consultando
 	cursor, err := coll.Find(ctx, bson.M{})
 	if err != nil {
 		return nil, err
 	}
 	defer cursor.Close(ctx)
-	var data []KindProduct
+	var data []ProductKind
 	if err = cursor.All(ctx, &data); err != nil {
 		return nil, err
 	}
-	fmt.Println(data)
+
 	return data, nil
 }
-func VerifyKindId(id string) bool {
+func UpdateNameKind(id primitive.ObjectID, name string) error {
+	// conectado a BBDD
 	ctx, client, coll := config.ConnectColl("kinds")
 	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
+	// actualizando
+	update := bson.M{"$set": bson.M{"name": name}}
+	_, err := coll.UpdateOne(ctx, bson.M{"_id": id}, update)
 
+	return err
+}
+func DeleteKindById(id primitive.ObjectID) error {
+	// conectado a BBDD
+	ctx, client, coll := config.ConnectColl("kinds")
+	defer fmt.Println("Disconnected DB")
+	defer client.Disconnect(ctx)
+	// eliminando de la BBDD
+	_, err := coll.DeleteOne(ctx, bson.M{"_id": id})
+
+	return err
+}
+func ExistKindId(id primitive.ObjectID) bool {
+	ctx, client, coll := config.ConnectColl("kinds")
+	defer fmt.Println("Disconnected DB")
+	defer client.Disconnect(ctx)
+	// consultando
+	kindModel := &ProductKind{}
+	err := coll.FindOne(ctx, bson.M{"_id": id}, options.FindOne().SetProjection(bson.M{"name": 0})).Decode(kindModel)
+
+	return err == nil
+}
+func ExistKindIdString(id string) bool {
+	ctx, client, coll := config.ConnectColl("kinds")
+	defer fmt.Println("Disconnected DB")
+	defer client.Disconnect(ctx)
+	// verificando si id es correcto
 	ObjId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return false
 	}
-
-	kindModel := &KindProduct{}
+	// consultando
+	kindModel := &ProductKind{}
 	err = coll.FindOne(ctx, bson.M{"_id": ObjId}, options.FindOne().SetProjection(bson.M{"name": 0})).Decode(kindModel)
-
-	// fmt.Println(kindModel)
 
 	return err == nil
 }

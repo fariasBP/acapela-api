@@ -7,11 +7,12 @@ import (
 )
 
 func ModelRoute(e *echo.Echo) {
+	e.GET("models/all", controllers.GetAllModels)
 	router := e.Group("/models", middlewares.ValidateToken)
-
 	router.POST("/create", controllers.CreateModel,
-		middlewares.IsAdminOrEmpl,
-		middlewares.NewProductModelValidate)
-	router.GET("/all", controllers.GetAllModels,
-		middlewares.IsAdminOrEmpl)
+		middlewares.IsBossOrAdmin, middlewares.ModelValidate)
+	router.PUT("/update", controllers.UpdateModel,
+		middlewares.IsBossOrAdmin, middlewares.ModelUpdateValidate)
+	router.DELETE("/delete", controllers.DeleteModel,
+		middlewares.IsBoss, middlewares.ModelDeleteValidate)
 }
