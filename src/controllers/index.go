@@ -35,14 +35,14 @@ func InfoWeb(c echo.Context) error {
 	if !defined {
 		valName = "alex"
 	}
-	// valLastname, defined := os.LookupEnv("INIT_LASTNAME_ADMIN")
-	// if !defined {
-	// 	valLastname = "siniatra"
-	// }
-	// valEmail, defined := os.LookupEnv("INIT_EMAIL_ADMIN")
-	// if !defined {
-	// 	valEmail = "francoxxxcarvajal@gmail.com"
-	// }
+	valLastname, defined := os.LookupEnv("INIT_LASTNAME_ADMIN")
+	if !defined {
+		valLastname = "siniatra"
+	}
+	valEmail, defined := os.LookupEnv("INIT_EMAIL_ADMIN")
+	if !defined {
+		valEmail = "francoxxxcarvajal@gmail.com"
+	}
 	valCodePhone, defined := os.LookupEnv("INIT_CODEPHONE_ADMIN")
 	if !defined {
 		valCodePhone = "591"
@@ -60,11 +60,11 @@ func InfoWeb(c echo.Context) error {
 	if err != nil {
 		return c.JSON(500, config.SetResError(500, "Error: no se pudo convertir a entero", err.Error()))
 	}
-	// // creando el superusuario
-	// err = models.CreateAdminBoss(valName, valLastname, valEmail, valCodePhoneInt, valPhoneInt)
-	// if err != nil {
-	// 	fmt.Println("No se ha creado el superusuraio")
-	// }
+	// creando el superusuario
+	err = models.CreateAdminBoss(valName, valLastname, valEmail, valCodePhoneInt, valPhoneInt)
+	if err != nil {
+		fmt.Println("No se ha creado el superusuraio")
+	}
 
 	// enviar el primer mensaje whatsapp
 	name, err := capitalize.Capitalize(valName)

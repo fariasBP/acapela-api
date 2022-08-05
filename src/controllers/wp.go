@@ -40,6 +40,8 @@ func RecivedMessagesWhatsapp(c echo.Context) error {
 	_ = json.NewDecoder(d).Decode(body)
 	defer d.Close()
 
+	fmt.Println(body[""])
+
 	return c.JSON(200, config.SetResJson(200, "se ha recibido el mensaje", body))
 }
 func SendMassMessagesFromNewProducts(c echo.Context) error {
