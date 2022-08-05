@@ -7,8 +7,8 @@ import (
 )
 
 func WPRoute(e *echo.Echo) {
-	e.GET("/webhook", controllers.FirstConfirmWithApiWhatsappForReciveMessage)
-	e.POST("/webhook", controllers.RecivedMessagesWhatsapp)
+	// e.GET("/webhook", controllers.FirstConfirmWithApiWhatsappForReciveMessage)
+	// e.POST("/webhook", controllers.RecivedMessagesWhatsapp)
 
 	wp := e.Group("/wp", middlewares.ValidateToken)
 	mass := wp.Group("/mass", middlewares.IsBoss)
