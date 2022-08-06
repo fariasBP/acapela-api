@@ -2,10 +2,6 @@ package config
 
 import "time"
 
-func code() {
-	USER_NOT_REGISTER := "000001"
-}
-
 type (
 	Res struct {
 		Code int    `json:"code"`
