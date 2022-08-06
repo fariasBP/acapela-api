@@ -2,9 +2,9 @@ package config
 
 import "time"
 
-// type Error interface {
-// 	Error() string
-// }
+func code() {
+	USER_NOT_REGISTER := "000001"
+}
 
 type (
 	Res struct {

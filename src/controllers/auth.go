@@ -9,57 +9,9 @@ import (
 	"github.com/fariasBP/acapela-api/src/models"
 	"github.com/fonini/go-capitalize/capitalize"
 	"github.com/labstack/echo/v4"
-	"github.com/sethvargo/go-password/password"
 )
 
 // ---- LOGEADORES ----
-// ---- obtener codigo ----
-func GetCodeLogin(c echo.Context) error {
-	// obteniendo variables
-	body := &models.User{}
-	d := c.Request().Body
-	_ = json.NewDecoder(d).Decode(body)
-	defer d.Close()
-	// verificando que existe el usuario
-	user, err := models.GetUserByPhone(body.CodePhone, body.Phone)
-	if err != nil {
-		return c.JSON(500, config.SetResError(500, "Error: no existe el numero de telefono", err.Error()))
-	}
-	// verificando que el codigo despues de un tiempo (despues de 1 hora)
-	// if year := user.CodeDate.Year(); year != 1 {
-	// 	_, month, day := user.CodeDate.Date()
-	// 	year2, month2, day2 := time.Now().UTC().Date()
-	// 	if year == year2 && month == month2 && day == day2 {
-	// 		hour, minNext1hour := user.CodeDate.Hour(), user.CodeDate.Add(time.Hour).Minute()
-	// 		hourCurrent, minCurrent := time.Now().UTC().Hour(), time.Now().UTC().Minute()
-	// 		if hour >= hourCurrent {
-	// 			if hour == hourCurrent+1 && minCurrent > minNext1hour {
-
-	// 			} else {
-	// 				return c.JSON(400, config.SetRes(400, "Error: ya se ha pedido codigo espere 1 HORA para pedir otro por favor"))
-	// 			}
-	// 		}
-	// 	}
-	// }
-	// creando codigo
-	cod, err := password.Generate(5, 2, 0, true, false)
-	if err != nil {
-		return c.JSON(500, config.SetResError(500, "Error: al crear codigo", err.Error()))
-	}
-	// insertando code a user
-	_, err = models.GetCode(user.ID, cod)
-	if err != nil {
-		return c.JSON(500, config.SetResError(500, "Error: al insertar codigo a BBDD", err.Error()))
-	}
-	// enviar mensaje del codigo por whatsapp
-	err = middlewares.SendCodeMessage(body.CodePhone, body.Phone, cod)
-	if err != nil {
-		return c.JSON(500, config.SetResError(500, "Error: al enviar codigo via whatsapp", err.Error()))
-
-	}
-
-	return c.JSON(200, config.SetResJson(200, "Codigo creado", map[string]interface{}{"Code": cod, "date": user.CodeDate.Local()}))
-}
 
 // ---- login ----
 func Login(c echo.Context) error {

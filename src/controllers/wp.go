@@ -3,47 +3,44 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 
 	"github.com/fariasBP/acapela-api/src/config"
 	"github.com/fariasBP/acapela-api/src/middlewares"
 	"github.com/fariasBP/acapela-api/src/models"
 	"github.com/labstack/echo/v4"
+	"github.com/sethvargo/go-password/password"
 )
 
-func FirstConfirmWithApiWhatsappForReciveMessage(c echo.Context) error {
-	tokenVerifyWP, _ := os.LookupEnv("WP_VERIFY_TOKEN")
-
-	// 	let mode = req.query["hub.mode"];
-	// let token = req.query["hub.verify_token"];
-	// let challenge = req.query["hub.challenge"];
-
-	mode := c.QueryParam("hub.mode")
-	token := c.QueryParam("hub.verify_token")
-	challange := c.QueryParam("hub.challenge")
-
-	fmt.Println(mode, token, challange)
-
-	// Check the mode and token sent are correct
-	if mode == "subscribe" && token == tokenVerifyWP {
-		// Respond with 200 OK and challenge token from the request
-		fmt.Println("WEBHOOK_VERIFIED")
-		return c.String(200, challange)
-	} else {
-		// Responds with '403 Forbidden' if verify tokens do not match
-		return c.String(404, challange)
-	}
-}
-func RecivedMessagesWhatsapp(c echo.Context) error {
-	body := make(map[string]interface{})
+func SendCode(c echo.Context) error {
+	// obteniendo variables
+	body := &models.User{}
 	d := c.Request().Body
 	_ = json.NewDecoder(d).Decode(body)
 	defer d.Close()
+	// verificando que existe el usuario
+	user, err := models.GetUserByPhone(body.CodePhone, body.Phone)
+	if err != nil {
+		return c.JSON(500, config.SetResError(500, "Error: no existe el numero de telefono", err.Error()))
+	}
+	// creando codigo
+	cod, err := password.Generate(5, 2, 0, true, false)
+	if err != nil {
+		return c.JSON(500, config.SetResError(500, "Error: al crear codigo", err.Error()))
+	}
+	// insertando code a user
+	_, err = models.SetCode(user.ID, cod)
+	if err != nil {
+		return c.JSON(500, config.SetResError(500, "Error: al insertar codigo a BBDD", err.Error()))
+	}
+	// enviar mensaje del codigo por whatsapp
+	err = middlewares.SendCodeMessageWithPhoneString(body.PhoneString, cod)
+	if err != nil {
+		return c.JSON(500, config.SetResError(500, "Error: al enviar codigo via whatsapp", err.Error()))
+	}
 
-	fmt.Println(body[""])
-
-	return c.JSON(200, config.SetResJson(200, "se ha recibido el mensaje", body))
+	return c.JSON(200, config.SetResJson(200, "Codigo creado", map[string]interface{}{"Code": cod, "date": user.CodeDate.Local()}))
 }
+
 func SendMassMessagesFromNewProducts(c echo.Context) error {
 
 	// // obtener todos los kinds y models

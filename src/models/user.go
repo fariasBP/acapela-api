@@ -32,6 +32,7 @@ type (
 		Rol           int                `json:"rol" bson:"rol,omitempty"`
 		CodePhone     int                `json:"code_phone" bson:"code_phone"`
 		Phone         int                `json:"phone" bson:"phone"`
+		PhoneString   string             `json:"phone_string" bson:"phone_string"`
 		Notifications bool               `json:"notifications" bson:"notifications"`
 		CreateDate    time.Time          `json:"create_date" bson:"create_date,omitempty"`
 		UpdateDate    time.Time          `json:"update_date" bson:"update_date,omitempty"`
@@ -46,6 +47,7 @@ type (
 		Rol           int                `json:"rol" bson:"rol,omitempty"`
 		Code          string             `json:"code" bson:"code"`
 		Phone         int                `json:"phone" bson:"phone"`
+		PhoneString   string             `json:"phone_string" bson:"phone_string"`
 		Notifications bool               `json:"notifications" bson:"notifications"`
 	}
 )
@@ -66,6 +68,7 @@ func GetUserByEmail(email string) (*User, error) {
 	return user, err
 }
 
+// obtener usuario por numero de telefono
 func GetUserByPhone(codePhone, phone int) (*User, error) {
 	// Conectando a la BBDD
 	ctx, client, coll := config.ConnectColl("users")
@@ -79,7 +82,18 @@ func GetUserByPhone(codePhone, phone int) (*User, error) {
 	}}).Decode(user)
 	return user, err
 }
+func GetUserByPhoneString(phoneString string) (*User, error) {
+	// Conectando a la BBDD
+	ctx, client, coll := config.ConnectColl("users")
+	defer fmt.Println("Disconnected DB")
+	defer client.Disconnect(ctx)
+	// consulatando
+	user := &User{}
+	err := coll.FindOne(ctx, bson.M{"phone_string": phoneString}).Decode(user)
+	return user, err
+}
 
+// obtener usuario por ID
 func GetUserById(id primitive.ObjectID) (*UserInfo, error) {
 	// Conectando a la BBDD
 	ctx, client, coll := config.ConnectColl("users")
@@ -101,6 +115,8 @@ func GetUserById(id primitive.ObjectID) (*UserInfo, error) {
 	}
 	return user, nil
 }
+
+// obtener usuarios
 func GetUsers() ([]User, error) {
 	// Conectando a la BBDD
 	ctx, client, coll := config.ConnectColl("users")
@@ -119,6 +135,8 @@ func GetUsers() ([]User, error) {
 	}
 	return users, nil
 }
+
+// obtener numero nombre y si recibe notificaiones de usuario
 func GetPhoneNameNotificationsFromUsers() ([]User, error) {
 	// Conectando a la BBDD
 	ctx, client, coll := config.ConnectColl("users")

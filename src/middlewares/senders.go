@@ -98,9 +98,67 @@ func SendCodeMessage(codePhone, phone int, code string) error {
 	versionWP, _ := os.LookupEnv("WP_API_VERSION")
 	phoneIdWP, _ := os.LookupEnv("WP_PHONE_ID")
 
-	codePhoneStr, phoneStr := strconv.Itoa(codePhone), strconv.Itoa(phone)
+	to := GetPhoneString(codePhone, phone)
 
-	to := codePhoneStr + phoneStr
+	fmt.Println("to:", to)
+	jsonStr := []byte(`{
+		"messaging_product": "whatsapp",
+		"to": "` + to + `",
+		"type": "template",
+		"template": {
+			"name": "verification_code",
+			"language": {
+				"code": "es",
+			},
+			"components" : [
+				{
+					"type": "body",
+					"parameters": [
+						{
+							"type": "text",
+							"text": "` + code + `",
+						}
+					]
+				}
+			]
+		}
+	}`)
+
+	req, err := http.NewRequest("POST", "https://graph.facebook.com/v"+versionWP+"/"+phoneIdWP+"/messages", bytes.NewBuffer(jsonStr))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+tokenMETA)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// fmt.Println("response Status:", resp.Status)
+	// fmt.Println("response Headers:", resp.Header)
+	// body, _ := ioutil.ReadAll(resp.Body)
+	// fmt.Println("response Body:", string(body))
+
+	if resp.StatusCode != 200 {
+		return err
+	}
+
+	return err
+}
+
+// mensaje de codigo por numero full string
+func SendCodeMessageWithPhoneString(phoneString, code string) error {
+	tokenMETA, _ := os.LookupEnv("META_BUSSINES_TOKEN")
+
+	versionWP, _ := os.LookupEnv("WP_API_VERSION")
+	phoneIdWP, _ := os.LookupEnv("WP_PHONE_ID")
+
+	to := phoneString
+
 	fmt.Println("to:", to)
 	jsonStr := []byte(`{
 		"messaging_product": "whatsapp",

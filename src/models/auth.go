@@ -126,7 +126,7 @@ func ExistsAdiminBoss() (b bool) {
 }
 
 // ---- obtener codigo de login ----
-func GetCode(id primitive.ObjectID, code string) (string, error) {
+func SetCode(id primitive.ObjectID, code string) (string, error) {
 	// Conectandose a la DDBB
 	ctx, client, coll := config.ConnectColl("users")
 	defer fmt.Println("Disconnected DB")

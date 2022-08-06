@@ -1,4 +1,4 @@
 .env
 ngrok.exe
 main.exe
-./main
+main
