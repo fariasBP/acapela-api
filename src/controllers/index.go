@@ -43,25 +43,17 @@ func InfoWeb(c echo.Context) error {
 	if !defined {
 		valEmail = "francoxxxcarvajal@gmail.com"
 	}
-	valCodePhone, defined := os.LookupEnv("INIT_CODEPHONE_ADMIN")
-	if !defined {
-		valCodePhone = "591"
-	}
 	valPhone, defined := os.LookupEnv("INIT_PHONE_ADMIN")
 	if !defined {
-		valPhone = "69804340"
+		valPhone = "59169804340"
 	}
 	// convirtiendo valores
-	valCodePhoneInt, err := strconv.Atoi(valCodePhone)
-	if err != nil {
-		return c.JSON(500, config.SetResError(500, "Error: no se pudo convertir a entero", err.Error()))
-	}
 	valPhoneInt, err := strconv.Atoi(valPhone)
 	if err != nil {
 		return c.JSON(500, config.SetResError(500, "Error: no se pudo convertir a entero", err.Error()))
 	}
 	// creando el superusuario
-	err = models.CreateAdminBoss(valName, valLastname, valEmail, valCodePhoneInt, valPhoneInt)
+	err = models.CreateAdminBoss(valName, valLastname, valEmail, valPhoneInt)
 	if err != nil {
 		fmt.Println("No se ha creado el superusuraio")
 	}
@@ -71,7 +63,7 @@ func InfoWeb(c echo.Context) error {
 	if err != nil {
 		name = valName
 	}
-	err = middlewares.SendWelcomeMessage(valCodePhoneInt, valPhoneInt, name)
+	err = middlewares.SendWelcomeMessage(valPhone, name)
 	if err != nil {
 		return c.JSON(200, config.SetResError(500, "Error: ususario fue registrado en BBDD pero no se envio el mensaje de bienvenida", err.Error()))
 	}

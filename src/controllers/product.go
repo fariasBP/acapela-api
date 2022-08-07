@@ -95,12 +95,12 @@ func SellProduct(c echo.Context) error {
 		return c.JSON(400, config.SetRes(400, "Error: no existe el product id"))
 	}
 	// verificar que existe el vendedor
-	exist = models.ExistsSellerID(body.Seller)
+	exist = models.ExistsSellerIDStr(body.Seller)
 	if !exist {
 		return c.JSON(400, config.SetRes(400, "Error: no existe el vendedor"))
 	}
 	// verificar si existe buyer
-	exist = models.ExistsBuyerID(body.Buyer)
+	exist = models.ExistsBuyerIDStr(body.Buyer)
 	if exist {
 		err := models.SellProductWithBuyer(body.ID, body.SellPrice, body.Seller, body.Buyer)
 		if err != nil {

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/fariasBP/acapela-api/src/config"
 	"github.com/fariasBP/acapela-api/src/middlewares"
@@ -47,7 +48,8 @@ func main() {
 	err := godotenv.Load()
 	if err == nil {
 		fmt.Println("load env successful")
-		e.Logger.Fatal(e.Start(":3000"))
+		portApi, _ := os.LookupEnv("PORT")
+		e.Logger.Fatal(e.Start(":" + portApi))
 	} else {
 		log.Fatal(config.SetResError(500, "NO SE PUEDE CARGAR VALORES ENV", err.Error()))
 	}

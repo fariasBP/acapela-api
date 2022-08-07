@@ -75,10 +75,10 @@ func GetAllProducts() ([]Product, error) {
 	defer client.Disconnect(ctx)
 
 	cursor, err := coll.Find(ctx, bson.M{})
-	defer cursor.Close(ctx)
 	if err != nil {
 		return nil, err
 	}
+	defer cursor.Close(ctx)
 
 	var products []Product
 
@@ -163,10 +163,10 @@ func GetLastDateFromCreated() (int, time.Month, int, error) {
 	// consultando (obteniendo el ultimo last created)
 	opts := options.Find().SetSort(bson.M{"last_created": -1}).SetLimit(1)
 	cursor, err := coll.Find(ctx, bson.M{}, opts)
-	defer cursor.Close(ctx)
 	if err != nil {
 		return 0, 0, 0, err
 	}
+	defer cursor.Close(ctx)
 	var createds []Created
 	if err = cursor.All(ctx, &createds); err != nil {
 		return 0, 0, 0, err
@@ -186,11 +186,10 @@ func GetLastDateFromProduct() (int, time.Month, int, error) {
 	// consultando
 	opts := options.Find().SetSort(bson.M{"create_date": -1}).SetLimit(1)
 	cursor, err := coll.Find(ctx, bson.M{}, opts)
-	defer cursor.Close(ctx)
-
 	if err != nil {
 		return 0, 0, 0, err
 	}
+	defer cursor.Close(ctx)
 	var products []Product
 	if err = cursor.All(ctx, &products); err != nil {
 		return 0, 0, 0, err
@@ -208,10 +207,10 @@ func IsEqualLastDateCreated() bool {
 	// consultando (obteniendo el ultimo last created)
 	opts := options.Find().SetSort(bson.M{"last_created": -1}).SetLimit(1)
 	cursor, err := coll.Find(ctx, bson.M{}, opts)
-	defer cursor.Close(ctx)
 	if err != nil {
 		return false
 	}
+	defer cursor.Close(ctx)
 	var createds []Created
 	if err = cursor.All(ctx, &createds); err != nil {
 		return false
@@ -226,11 +225,10 @@ func IsEqualLastDateCreated() bool {
 
 	opts = options.Find().SetSort(bson.M{"create_date": -1}).SetLimit(1)
 	cursor, err = coll.Find(ctx, bson.M{}, opts)
-	defer cursor.Close(ctx)
-
 	if err != nil {
 		return false
 	}
+	defer cursor.Close(ctx)
 	var products []Product
 	if err = cursor.All(ctx, &products); err != nil {
 		return false

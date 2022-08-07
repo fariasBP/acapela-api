@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
-	"strings"
+	"strconv"
 
 	"github.com/fariasBP/acapela-api/src/config"
 	"github.com/fariasBP/acapela-api/src/middlewares"
@@ -12,7 +12,6 @@ import (
 )
 
 // ---- LOGEADORES ----
-
 // ---- login ----
 func Login(c echo.Context) error {
 	// obteniendo variables
@@ -21,7 +20,7 @@ func Login(c echo.Context) error {
 	_ = json.NewDecoder(d).Decode(body)
 	defer d.Close()
 	// buscar usuario por numero
-	user, err := models.GetUserByPhone(body.CodePhone, body.Phone)
+	user, err := models.GetUserByPhone(body.Phone)
 	if err != nil {
 		return c.JSON(404, config.SetResError(404, "Error: Numero de telefono no registrado.", err.Error()))
 	}
@@ -73,29 +72,24 @@ func ClientRegistrar(c echo.Context) error {
 	_ = json.NewDecoder(d).Decode(body)
 	defer d.Close()
 	// verificar que no exista un code + phone iguales
-	existPhone := models.ExistsPhone(body.CodePhone, body.Phone)
+	existPhone := models.ExistsPhone(body.Phone)
 	if existPhone {
 		return c.JSON(400, config.SetRes(400, "Error: El telefono ya ha sido registrado."))
 	}
 	// crear usuario en BBDD
-	err := models.ClientRegistrar(strings.TrimSpace(body.Name), body.CodePhone, body.Phone)
+	err := models.ClientRegistrar(body.Name, body.Phone)
 	if err != nil {
 		return c.JSON(500, config.SetResError(500, "Error: No se ha registrado al cliente", err.Error()))
 	}
-	// // enviar el primer mensaje whatsapp
+	// Capitalizando nombre
 	name, err := capitalize.Capitalize(body.Name)
 	if err != nil {
 		name = body.Name
 	}
-	// to := body.Code + strconv.Itoa(body.Phone)
-	// err = middlewares.SendFirstMessageWelcome(to, name)
-	// if err != nil {
-	// 	return c.JSON(200, config.SetResError(500, "user registered but don't send first message whatsapp", err.Error()))
-	// }
 	// enviar el mesaje de bienvenida
-	err = middlewares.SendWelcomeMessage(body.CodePhone, body.Phone, name)
+	err = middlewares.SendWelcomeMessage(strconv.Itoa(body.Phone), name)
 	if err != nil {
-		return c.JSON(200, config.SetResError(500, "Error: ususario fue registrado en BBDD pero no se envio el mensaje de bienvenida", err.Error()))
+		return c.JSON(200, config.SetResError(500, "Error: usario fue registrado en BBDD pero no se envio el mensaje de bienvenida", err.Error()))
 	}
 
 	return c.JSON(200, config.SetRes(200, "Cliente registrado."))
@@ -109,25 +103,25 @@ func EmployeRegistrar(c echo.Context) error {
 	_ = json.NewDecoder(d).Decode(body)
 	defer d.Close()
 	// verificar que no exista un code + phone iguales
-	existPhone := models.ExistsPhone(body.CodePhone, body.Phone)
+	existPhone := models.ExistsPhone(body.Phone)
 	if existPhone {
 		return c.JSON(400, config.SetRes(400, "Error: El telefono ya ha sido registrado."))
 	}
 	// crear ususario en BBDD
-	err := models.EmployRegistrar(strings.TrimSpace(body.Name), body.CodePhone, body.Phone)
+	err := models.EmployRegistrar(body.Name, body.Phone)
 	if err != nil {
 		return c.JSON(500, config.SetResError(500, "Error: No se ha registrado al empleado.", err.Error()))
 	}
-	// // enviar el primer mensaje whatsapp
-	// name, err := capitalize.Capitalize(body.Name)
-	// if err != nil {
-	// 	name = body.Name
-	// }
-	// to := body.Code + strconv.Itoa(body.Phone)
-	// err = middlewares.SendFirstMessageWelcome(to, name)
-	// if err != nil {
-	// 	return c.JSON(200, config.SetResError(500, "user registered but don't send first message whatsapp", err.Error()))
-	// }
+	// Capitalizando nombre
+	name, err := capitalize.Capitalize(body.Name)
+	if err != nil {
+		name = body.Name
+	}
+	// enviar el mesaje de bienvenida
+	err = middlewares.SendWelcomeMessage(strconv.Itoa(body.Phone), name)
+	if err != nil {
+		return c.JSON(200, config.SetResError(500, "Error: usario fue registrado en BBDD pero no se envio el mensaje de bienvenida", err.Error()))
+	}
 
 	return c.JSON(200, config.SetRes(200, "Empleado registrado."))
 }
@@ -140,25 +134,25 @@ func AdminEmployeRegistrar(c echo.Context) error {
 	_ = json.NewDecoder(d).Decode(body)
 	defer d.Close()
 	// verificar que no exista un code + phone iguales
-	existPhone := models.ExistsPhone(body.CodePhone, body.Phone)
+	existPhone := models.ExistsPhone(body.Phone)
 	if existPhone {
 		return c.JSON(400, config.SetRes(400, "Error: El telefono ya ha sido registrado."))
 	}
 	// crear ususario en BBDD
-	err := models.AdminEmployRegistrar(strings.TrimSpace(body.Name), body.CodePhone, body.Phone)
+	err := models.AdminEmployRegistrar(body.Name, body.Phone)
 	if err != nil {
 		return c.JSON(500, config.SetResError(500, "Error: No se ha registrado al empleado.", err.Error()))
 	}
-	// // enviar el primer mensaje whatsapp
-	// name, err := capitalize.Capitalize(body.Name)
-	// if err != nil {
-	// 	name = body.Name
-	// }
-	// to := body.Code + strconv.Itoa(body.Phone)
-	// err = middlewares.SendFirstMessageWelcome(to, name)
-	// if err != nil {
-	// 	return c.JSON(200, config.SetResError(500, "user registered but don't send first message whatsapp", err.Error()))
-	// }
+	// Capitalizando nombre
+	name, err := capitalize.Capitalize(body.Name)
+	if err != nil {
+		name = body.Name
+	}
+	// enviar el mesaje de bienvenida
+	err = middlewares.SendWelcomeMessage(strconv.Itoa(body.Phone), name)
+	if err != nil {
+		return c.JSON(200, config.SetResError(500, "Error: usario fue registrado en BBDD pero no se envio el mensaje de bienvenida", err.Error()))
+	}
 
 	return c.JSON(200, config.SetRes(200, "Empleado administrativo registrado."))
 }
