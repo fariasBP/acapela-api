@@ -106,7 +106,7 @@ func SendDefaultMessageWp(c echo.Context) error {
 	// verficar si existe el usuario
 	user, err := models.GetUserByPhone(body.Phone)
 	if err != nil {
-		middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se reconoce el comando y no esta registrado en Acapela.Shop, registrese envian un mensaje con la palabra 'registrarse'.")
+		middlewares.SendDefaultMsgRegistration(strconv.Itoa(body.Phone))
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
 	}
 	// verficar si es un auto registration
@@ -114,7 +114,14 @@ func SendDefaultMessageWp(c echo.Context) error {
 		err = models.UpdUserNameByPhone(body.Phone, body.Name)
 		if err != nil {
 			middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se pudo registrar el nombre. Si tiene alguna duda o consulta envie un mensaje via whatsapp al 69804340.")
+			return c.JSON(500, config.SetResError(500, "Error: No se pudo actualizar el nombre", err.Error()))
 		}
+		err = middlewares.SendWelcomeMessage(strconv.Itoa(body.Phone), body.Name)
+		if err != nil {
+			middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se pude enviar el mensaje de bienvenida.")
+			return c.JSON(500, config.SetResError(500, "Error: No se pudo enviar el mensaje de bienvenida", err.Error()))
+		}
+		return c.JSON(200, config.SetRes(200, "Se cambio el nombre correctamente"))
 	}
 	// enviando mensaje default
 	err = middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se reconoce el comando. Si tiene alguna duda o consulta envie un mensaje via whatsapp al 69804340.")

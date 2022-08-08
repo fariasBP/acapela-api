@@ -156,6 +156,47 @@ func SendCodeMessage(to, code string) error {
 	return err
 }
 
+// ---- registrarse (mensaje default para aquellos que no esten registrados) ----
+func SendDefaultMsgRegistration(to string) error {
+	// obtener las variables de entorno
+	tokenMETA, _ := os.LookupEnv("META_BUSSINES_TOKEN")
+
+	versionWP, _ := os.LookupEnv("WP_API_VERSION")
+	phoneIdWP, _ := os.LookupEnv("WP_PHONE_ID")
+	// estableciendo template
+	jsonStr := []byte(`{
+		"messaging_product": "whatsapp",
+		"to": "` + to + `",
+		"type": "template",
+		"template": {
+			"name": "registrarse",
+			"language": {
+				"code": "es",
+			},
+		}
+	}`)
+	// estableciendo parametros de consulta consulta a la api
+	req, err := http.NewRequest("POST", "https://graph.facebook.com/v"+versionWP+"/"+phoneIdWP+"/messages", bytes.NewBuffer(jsonStr))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+tokenMETA)
+	// realizando consulta
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	// verificando una respuesta correcta
+	if resp.StatusCode != 200 {
+		return err
+	}
+
+	return err
+}
+
 func SendNewProduct(codePhone, phone int, userName, kindName, forGender string) error {
 	tokenMETA, _ := os.LookupEnv("META_BUSSINES_TOKEN")
 
@@ -206,11 +247,6 @@ func SendNewProduct(codePhone, phone int, userName, kindName, forGender string) 
 		return err
 	}
 	defer resp.Body.Close()
-
-	// fmt.Println("response Status:", resp.Status)
-	// fmt.Println("response Headers:", resp.Header)
-	// body, _ := ioutil.ReadAll(resp.Body)
-	// fmt.Println("response Body:", string(body))
 
 	if resp.StatusCode != 200 {
 		return err
