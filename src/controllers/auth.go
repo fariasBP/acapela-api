@@ -26,6 +26,7 @@ func Login(c echo.Context) error {
 	if err != nil {
 		return c.JSON(404, config.SetResError(404, "Error: Numero de telefono no registrado.", err.Error()))
 	}
+	fmt.Println(user.Code)
 	fmt.Println(body.Code == user.Code)
 	if user.Code != body.Code {
 		return c.JSON(400, config.SetRes(400, "Error: Codigo incorrecto"))
