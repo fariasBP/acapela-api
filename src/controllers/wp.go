@@ -303,13 +303,13 @@ func SendDefaultMessageWp(c echo.Context) error {
 		return c.JSON(200, config.SetRes(200, "Se cambio el nombre correctamente"))
 	}
 	// verificar si esta inactivo
-	verify := models.VerifyActiveUserByPhone(body.Phone)
-	if !verify {
+	active := models.VerifyActiveUserByPhone(body.Phone)
+	if !active {
 		middlewares.SendReactive(strconv.Itoa(body.Phone))
 		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))
 	}
 	// enviando mensaje default
-	err = middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se reconoce el comando. Si tiene alguna duda o consulta envie un mensaje via whatsapp al 69804340.")
+	err = middlewares.SendDefaultMessageNoCommand(strconv.Itoa(body.Phone))
 	if err != nil {
 		return c.JSON(400, config.SetResError(400, "Error: al enviar mensaje whatsapp", err.Error()))
 	}

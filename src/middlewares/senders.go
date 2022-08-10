@@ -2,7 +2,6 @@ package middlewares
 
 import (
 	"bytes"
-	"fmt"
 	"net/http"
 	"os"
 	"strconv"
@@ -147,6 +146,48 @@ func SendLocationMessage(to string) error {
 	return err
 }
 
+// ---- enviar mensaje por defecto ----
+func SendDefaultMessageNoCommand(to string) error {
+	// obtener las variables de entorno
+	tokenMETA, _ := os.LookupEnv("META_BUSSINES_TOKEN")
+
+	versionWP, _ := os.LookupEnv("WP_API_VERSION")
+	phoneIdWP, _ := os.LookupEnv("WP_PHONE_ID")
+
+	// estructura del mensaje
+	jsonStr := []byte(`{
+		"messaging_product": "whatsapp",
+		"to": "` + to + `",
+		"type": "template",
+		"template": {
+			"name": "no_se_reconoce_el_comando",
+			"language": {
+				"code": "es",
+			},
+		}
+	}`)
+
+	req, err := http.NewRequest("POST", "https://graph.facebook.com/v"+versionWP+"/"+phoneIdWP+"/messages", bytes.NewBuffer(jsonStr))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+tokenMETA)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return err
+	}
+
+	return err
+}
+
 // ---- AUTENTICACION ----
 // mensaje de codigo
 func SendCodeMessage(to, code string) error {
@@ -155,7 +196,6 @@ func SendCodeMessage(to, code string) error {
 	versionWP, _ := os.LookupEnv("WP_API_VERSION")
 	phoneIdWP, _ := os.LookupEnv("WP_PHONE_ID")
 
-	fmt.Println("to:", to)
 	jsonStr := []byte(`{
 		"messaging_product": "whatsapp",
 		"to": "` + to + `",
