@@ -61,11 +61,9 @@ func GetUserByPhone(phone int) (*User, error) {
 	ctx, client, coll := config.ConnectColl("users")
 	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
-	// establecindo filter y opciones
-	opts := options.FindOne().SetProjection(bson.M{"code": 0})
 	// consulatando
 	user := &User{}
-	err := coll.FindOne(ctx, bson.M{"phone": phone}, opts).Decode(user)
+	err := coll.FindOne(ctx, bson.M{"phone": phone}).Decode(user)
 	return user, err
 }
 
