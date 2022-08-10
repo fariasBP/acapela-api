@@ -13,6 +13,7 @@ func WPRoute(e *echo.Echo) {
 	wp.POST("/linkfacebook", controllers.SendLinkFacebookWp)
 	wp.POST("/default", controllers.SendDefaultMessageWp)
 	wp.POST("/moreopt", controllers.SendMoreOptWp)
+	wp.POST("/moreoptuno", controllers.SendMoreOptOneWp)
 	wp.POST("/inactive", controllers.SendConfirmInactiveWp)
 	wp.POST("/sleep", controllers.InactiveUserWp)
 	wp.POST("/location", controllers.SendLocationMessageWp)

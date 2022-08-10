@@ -390,12 +390,12 @@ func SendMoreOptOneWp(c echo.Context) error {
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
 	}
 	// verificar si esta inactivo
-	verify := models.VerifyActiveUserByPhone(body.Phone)
-	if !verify {
+	active := models.VerifyActiveUserByPhone(body.Phone)
+	if !active {
 		middlewares.SendReactive(strconv.Itoa(body.Phone))
 		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))
 	}
-	// enviando el mensaje de mas opciones
+	// enviando el mensaje de mas opciones uno
 	err := middlewares.SendMoreOptsOne(strconv.Itoa(body.Phone))
 	if err != nil {
 		middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se puedo devolver una respuesta, intente de nuevo.")
