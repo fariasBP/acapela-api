@@ -12,6 +12,13 @@ func WPRoute(e *echo.Echo) {
 	wp.POST("/code", controllers.SendCodeWp)
 	wp.POST("/linkfacebook", controllers.SendLinkFacebookWp)
 	wp.POST("/default", controllers.SendDefaultMessageWp)
+	wp.POST("/moreopt", controllers.SendMoreOptWp)
+	wp.POST("/inactive", controllers.SendConfirmInactiveWp)
+	wp.POST("/sleep", controllers.InactiveUserWp)
+	wp.POST("/location", controllers.SendLocationMessageWp)
+	wp.POST("/reactive", controllers.ReactiveUserWp)
+	wp.POST("/deleteuser", controllers.SendConfirmDeleteWp)
+	wp.POST("/confirmdeleteuser", controllers.DeleteUserWp)
 	// mass := wp.Group("/mass", middlewares.IsBoss)
 	// mass.POST("/newproducts", controllers.SendMassMessagesFromNewProducts)
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/sethvargo/go-password/password"
 )
 
+// ---- AUTENTICACION ----
 // ---- registration ----
 func RegistrationWp(c echo.Context) error {
 	// obteniendo variables
@@ -50,8 +51,14 @@ func SendCodeWp(c echo.Context) error {
 	// verificando que existe el usuario
 	user, err := models.GetUserByPhone(body.Phone)
 	if err != nil {
-		middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No esta registrado en Acapela.Shop, registrese envian un mensaje con la palabra 'registrarse'.")
+		middlewares.SendDefaultMsgRegistration(strconv.Itoa(body.Phone))
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
+	}
+	// verificar si esta inactivo
+	verify := models.VerifyActiveUserByPhone(strconv.Itoa(body.Phone))
+	if !verify {
+		middlewares.SendReactive(strconv.Itoa(body.Phone))
+		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))
 	}
 	// verificar si ha pasado 1 hora
 	if time.Now().UTC().After(user.CodeDate.Add(time.Minute)) {
@@ -79,6 +86,179 @@ func SendCodeWp(c echo.Context) error {
 	return c.JSON(400, config.SetRes(400, "Error: No se puede enviar el codigo por que ya se ha solicitado uno"))
 }
 
+// ---- enviar Confirmacion de inactivarse ----
+func SendConfirmInactiveWp(c echo.Context) error {
+	// obteniendo variables
+	body := &models.User{}
+	d := c.Request().Body
+	_ = json.NewDecoder(d).Decode(body)
+	defer d.Close()
+	// verficar si existe el usuario
+	exists := models.ExistsPhone(body.Phone)
+	if exists {
+		middlewares.SendDefaultMsgRegistration(strconv.Itoa(body.Phone))
+		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
+	}
+	// verificar si esta inactivo
+	verify := models.VerifyActiveUserByPhone(strconv.Itoa(body.Phone))
+	if !verify {
+		middlewares.SendReactive(strconv.Itoa(body.Phone))
+		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))
+	}
+	// enviando el mensaje de la confirmacion de inactivacion
+	err := middlewares.SendConfirmInactiveUser(strconv.Itoa(body.Phone))
+	if err != nil {
+		middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se puedo devolver una respuesta, intente de nuevo.")
+		return c.JSON(500, config.SetResError(500, "Error: no se puedo enviar la plantilla confirmar inactivacion", err.Error()))
+	}
+
+	return c.JSON(200, config.SetRes(200, "Se envio correctamente el mensaje"))
+}
+
+// ---- enviar Confirmacion de darse de baja ----
+func SendConfirmDeleteWp(c echo.Context) error {
+	// obteniendo variables
+	body := &models.User{}
+	d := c.Request().Body
+	_ = json.NewDecoder(d).Decode(body)
+	defer d.Close()
+	// verficar si existe el usuario
+	exists := models.ExistsPhone(body.Phone)
+	if exists {
+		middlewares.SendDefaultMsgRegistration(strconv.Itoa(body.Phone))
+		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
+	}
+	// verificar si esta inactivo
+	verify := models.VerifyActiveUserByPhone(strconv.Itoa(body.Phone))
+	if !verify {
+		middlewares.SendReactive(strconv.Itoa(body.Phone))
+		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))
+	}
+	// enviando el mensaje de la confirmacion de inactivacion
+	err := middlewares.SendConfirmDeleteUser(strconv.Itoa(body.Phone))
+	if err != nil {
+		middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se puedo devolver una respuesta, intente de nuevo.")
+		return c.JSON(500, config.SetResError(500, "Error: no se puedo enviar la plantilla confirmar darse de baja", err.Error()))
+	}
+
+	return c.JSON(200, config.SetRes(200, "Se envio correctamente el mensaje"))
+}
+
+// ---- eliminar usuario ----
+func DeleteUserWp(c echo.Context) error {
+	// obteniendo variables
+	body := &models.User{}
+	d := c.Request().Body
+	_ = json.NewDecoder(d).Decode(body)
+	defer d.Close()
+	// verficar si existe el usuario
+	exists := models.ExistsPhone(body.Phone)
+	if exists {
+		middlewares.SendDefaultMsgRegistration(strconv.Itoa(body.Phone))
+		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
+	}
+	// verificar si esta inactivo
+	verify := models.VerifyActiveUserByPhone(strconv.Itoa(body.Phone))
+	if !verify {
+		middlewares.SendReactive(strconv.Itoa(body.Phone))
+		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))
+	}
+	// consultando - eliminando usuario
+	err := models.DelUserByPhone(body.Phone)
+	if err != nil {
+		middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se puedo eliminar los datos, intente de nuevo.")
+		return c.JSON(500, config.SetResError(500, "Error: no se pudo eliminar el usuario", err.Error()))
+	}
+	middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "Se elimino correctamente tus datos.")
+
+	return c.JSON(200, config.SetRes(200, "Se elimino al usuario y envio correctamente el mensaje"))
+}
+
+// ---- inactivar al usuario ----
+func InactiveUserWp(c echo.Context) error {
+	// obteniendo variables
+	body := &models.User{}
+	d := c.Request().Body
+	_ = json.NewDecoder(d).Decode(body)
+	defer d.Close()
+	// verficar si existe el usuario
+	exists := models.ExistsPhone(body.Phone)
+	if exists {
+		middlewares.SendDefaultMsgRegistration(strconv.Itoa(body.Phone))
+		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
+	}
+	// verificar si esta inactivo
+	verify := models.VerifyActiveUserByPhone(strconv.Itoa(body.Phone))
+	if !verify {
+		middlewares.SendReactive(strconv.Itoa(body.Phone))
+		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))
+	}
+	// consultando - inactivando usuario en BBDD
+	err := models.UpdInactiveUserByPhone(body.Phone, body.Sleep)
+	if err != nil {
+		middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se te pudo inactivar.")
+		return c.JSON(500, config.SetResError(500, "Error: no se pudo inactivar al usuario", err.Error()))
+	}
+
+	middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "Se te inactivo correctamente.")
+	return c.JSON(200, config.SetRes(200, "Se inactivo al usuario correctamente"))
+}
+
+// ---- reactivar al usuario ----
+func ReactiveUserWp(c echo.Context) error {
+	// obteniendo variables
+	body := &models.User{}
+	d := c.Request().Body
+	_ = json.NewDecoder(d).Decode(body)
+	defer d.Close()
+	// verficar si existe el usuario
+	exists := models.ExistsPhone(body.Phone)
+	if exists {
+		middlewares.SendDefaultMsgRegistration(strconv.Itoa(body.Phone))
+		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
+	}
+	// consultando - inactivando usuario en BBDD
+	err := models.UpdReactiveUserByPhone(body.Phone)
+	if err != nil {
+		middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se te pudo reactivar, posiblemente ya estes activo.")
+		return c.JSON(500, config.SetResError(500, "Error: no se pudo reactivar al usuario", err.Error()))
+	}
+	middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "Se reactivo su cuenta.")
+
+	return c.JSON(200, config.SetRes(200, "Se reactivo al usuario correctamente"))
+}
+
+// ---- enviar template darse de baja al usuario ----
+func DelUserTemplateWp(c echo.Context) error {
+	// obteniendo variables
+	body := &models.User{}
+	d := c.Request().Body
+	_ = json.NewDecoder(d).Decode(body)
+	defer d.Close()
+	// verficar si existe el usuario
+	exists := models.ExistsPhone(body.Phone)
+	if exists {
+		middlewares.SendDefaultMsgRegistration(strconv.Itoa(body.Phone))
+		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
+	}
+	// verificar si esta inactivo
+	verify := models.VerifyActiveUserByPhone(strconv.Itoa(body.Phone))
+	if !verify {
+		middlewares.SendReactive(strconv.Itoa(body.Phone))
+		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))
+	}
+	// consultando - inactivando usuario en BBDD
+	err := models.UpdReactiveUserByPhone(body.Phone)
+	if err != nil {
+		middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se te reactivar.")
+		return c.JSON(500, config.SetResError(500, "Error: no se pudo reactivar al usuario", err.Error()))
+	}
+	middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "Se reactivo su cuenta.")
+
+	return c.JSON(200, config.SetRes(200, "Se reactivo al usuario correctamente"))
+}
+
+// ---- UTILITARIOS ----
 // ---- enviar link de facebook ----
 func SendLinkFacebookWp(c echo.Context) error {
 	// obteniendo variables
@@ -93,7 +273,6 @@ func SendLinkFacebookWp(c echo.Context) error {
 	}
 
 	return c.JSON(200, config.SetRes(200, "se envio el mensaje"))
-
 }
 
 // ---- Enviar mensaje por defecto ----
@@ -123,10 +302,104 @@ func SendDefaultMessageWp(c echo.Context) error {
 		}
 		return c.JSON(200, config.SetRes(200, "Se cambio el nombre correctamente"))
 	}
+	// verificar si esta inactivo
+	verify := models.VerifyActiveUserByPhone(strconv.Itoa(body.Phone))
+	if !verify {
+		middlewares.SendReactive(strconv.Itoa(body.Phone))
+		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))
+	}
 	// enviando mensaje default
 	err = middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se reconoce el comando. Si tiene alguna duda o consulta envie un mensaje via whatsapp al 69804340.")
 	if err != nil {
 		return c.JSON(400, config.SetResError(400, "Error: al enviar mensaje whatsapp", err.Error()))
+	}
+
+	return c.JSON(200, config.SetRes(200, "Se envio correctamente el mensaje"))
+}
+
+// ---- enviar ubicacion ----
+func SendLocationMessageWp(c echo.Context) error {
+	// obteniendo variables
+	body := &models.User{}
+	d := c.Request().Body
+	_ = json.NewDecoder(d).Decode(body)
+	defer d.Close()
+	// verficar si existe el usuario
+	exists := models.ExistsPhone(body.Phone)
+	if exists {
+		middlewares.SendDefaultMsgRegistration(strconv.Itoa(body.Phone))
+		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
+	}
+	// verificar si esta inactivo
+	verify := models.VerifyActiveUserByPhone(strconv.Itoa(body.Phone))
+	if !verify {
+		middlewares.SendReactive(strconv.Itoa(body.Phone))
+		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))
+	}
+	// enviando mensaje location
+	err := middlewares.SendLocationMessage(strconv.Itoa(body.Phone))
+	if err != nil {
+		middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se pudo enviar la ubicacion, intente de nuevo.")
+		return c.JSON(400, config.SetResError(400, "Error: al enviar la localizacion whatsapp", err.Error()))
+	}
+
+	return c.JSON(200, config.SetRes(200, "Se envio correctamente la localizacion"))
+}
+
+// ---- MAS OPCIONES ----
+// ---- enviar mas opciones cero ----
+func SendMoreOptWp(c echo.Context) error {
+	// obteniendo variables
+	body := &models.User{}
+	d := c.Request().Body
+	_ = json.NewDecoder(d).Decode(body)
+	defer d.Close()
+	// verficar si existe el usuario
+	exists := models.ExistsPhone(body.Phone)
+	if exists {
+		middlewares.SendDefaultMsgRegistration(strconv.Itoa(body.Phone))
+		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
+	}
+	// verificar si esta inactivo
+	verify := models.VerifyActiveUserByPhone(strconv.Itoa(body.Phone))
+	if !verify {
+		middlewares.SendReactive(strconv.Itoa(body.Phone))
+		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))
+	}
+	// enviando el mensaje de mas opciones
+	err := middlewares.SendMoreOpts(strconv.Itoa(body.Phone))
+	if err != nil {
+		middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se puedo devolver una respuesta, intente de nuevo.")
+		return c.JSON(500, config.SetResError(500, "Error: no se puedo enviar la plantilla mas opciones", err.Error()))
+	}
+
+	return c.JSON(200, config.SetRes(200, "Se envio correctamente el mensaje"))
+}
+
+// ---- enviar mas opciones uno ----
+func SendMoreOptOneWp(c echo.Context) error {
+	// obteniendo variables
+	body := &models.User{}
+	d := c.Request().Body
+	_ = json.NewDecoder(d).Decode(body)
+	defer d.Close()
+	// verficar si existe el usuario
+	exists := models.ExistsPhone(body.Phone)
+	if exists {
+		middlewares.SendDefaultMsgRegistration(strconv.Itoa(body.Phone))
+		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
+	}
+	// verificar si esta inactivo
+	verify := models.VerifyActiveUserByPhone(strconv.Itoa(body.Phone))
+	if !verify {
+		middlewares.SendReactive(strconv.Itoa(body.Phone))
+		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))
+	}
+	// enviando el mensaje de mas opciones
+	err := middlewares.SendMoreOptsOne(strconv.Itoa(body.Phone))
+	if err != nil {
+		middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se puedo devolver una respuesta, intente de nuevo.")
+		return c.JSON(500, config.SetResError(500, "Error: no se puedo enviar la plantilla mas opciones", err.Error()))
 	}
 
 	return c.JSON(200, config.SetRes(200, "Se envio correctamente el mensaje"))
@@ -161,3 +434,33 @@ func SendDefaultMessageWp(c echo.Context) error {
 
 // 	return c.JSON(200, config.SetRes(200, "Se envio los mesajes masivos correctamente"))
 // }
+
+func templateVerifyInit(body *models.User, c echo.Context) error {
+	// verficar si existe el usuario
+	user, err := models.GetUserByPhone(body.Phone)
+	if err != nil {
+		middlewares.SendDefaultMsgRegistration(strconv.Itoa(body.Phone))
+		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
+	}
+	// verficar si es un auto registration
+	if user.WpRegistration && (time.Now().UTC().Before(user.WpRegistrationDate.Add((time.Minute))) || time.Time{} == user.WpRegistrationDate) {
+		err = models.UpdUserNameByPhone(body.Phone, body.Name)
+		if err != nil {
+			middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se pudo registrar el nombre. Si tiene alguna duda o consulta envie un mensaje via whatsapp al 69804340.")
+			return c.JSON(500, config.SetResError(500, "Error: No se pudo actualizar el nombre", err.Error()))
+		}
+		err = middlewares.SendWelcomeMessage(strconv.Itoa(body.Phone), body.Name)
+		if err != nil {
+			middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se pude enviar el mensaje de bienvenida.")
+			return c.JSON(500, config.SetResError(500, "Error: No se pudo enviar el mensaje de bienvenida", err.Error()))
+		}
+		return c.JSON(200, config.SetRes(200, "Se cambio el nombre correctamente"))
+	}
+	// verificar si esta inactivo
+	verify := models.VerifyActiveUserByPhone(strconv.Itoa(body.Phone))
+	if !verify {
+		middlewares.SendReactive(strconv.Itoa(body.Phone))
+		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))
+	}
+	return nil
+}

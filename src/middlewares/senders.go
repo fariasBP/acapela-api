@@ -8,45 +8,7 @@ import (
 	"strconv"
 )
 
-// enviar cualquier mensajes (solo si abre la comunicacion)
-func SendAnyMessageText(to, msg string) error {
-	// obtener las variables de entorno
-	tokenMETA, _ := os.LookupEnv("META_BUSSINES_TOKEN")
-
-	versionWP, _ := os.LookupEnv("WP_API_VERSION")
-	phoneIdWP, _ := os.LookupEnv("WP_PHONE_ID")
-
-	// estructura del mensaje
-	jsonStr := []byte(`{
-		"messaging_product": "whatsapp",
-		"to": "` + to + `",
-		"type": "text",
-		"text": {
-			"body": "` + msg + `"
-		}
-	}`)
-
-	req, err := http.NewRequest("POST", "https://graph.facebook.com/v"+versionWP+"/"+phoneIdWP+"/messages", bytes.NewBuffer(jsonStr))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+tokenMETA)
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		return err
-	}
-
-	return err
-}
-
+// ---- UTILITARIOS ----
 // mensaje de bienvenida
 func SendWelcomeMessage(to, userName string) error {
 	// obtener las variables de entorno
@@ -104,6 +66,88 @@ func SendWelcomeMessage(to, userName string) error {
 	return err
 }
 
+// enviar cualquier mensajes (solo si abre la comunicacion)
+func SendAnyMessageText(to, msg string) error {
+	// obtener las variables de entorno
+	tokenMETA, _ := os.LookupEnv("META_BUSSINES_TOKEN")
+
+	versionWP, _ := os.LookupEnv("WP_API_VERSION")
+	phoneIdWP, _ := os.LookupEnv("WP_PHONE_ID")
+
+	// estructura del mensaje
+	jsonStr := []byte(`{
+		"messaging_product": "whatsapp",
+		"to": "` + to + `",
+		"type": "text",
+		"text": {
+			"body": "` + msg + `"
+		}
+	}`)
+
+	req, err := http.NewRequest("POST", "https://graph.facebook.com/v"+versionWP+"/"+phoneIdWP+"/messages", bytes.NewBuffer(jsonStr))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+tokenMETA)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return err
+	}
+
+	return err
+}
+
+// ---- enviar mensaje de ubicacion ----
+func SendLocationMessage(to string) error {
+	// obtener las variables de entorno
+	tokenMETA, _ := os.LookupEnv("META_BUSSINES_TOKEN")
+
+	versionWP, _ := os.LookupEnv("WP_API_VERSION")
+	phoneIdWP, _ := os.LookupEnv("WP_PHONE_ID")
+
+	// estructura del mensaje
+	jsonStr := []byte(`{
+		"messaging_product": "whatsapp",
+		"to": "` + to + `",
+		"type": "location",
+		"location": {
+			"longitude": "-16.5182912",
+			"latitude": "-68.1644432",
+			"name": "Acapela Shop",
+			"address": "Av. Tiahuanacu, El Alto"
+	}
+	}`)
+
+	req, err := http.NewRequest("POST", "https://graph.facebook.com/v"+versionWP+"/"+phoneIdWP+"/messages", bytes.NewBuffer(jsonStr))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+tokenMETA)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return err
+	}
+
+	return err
+}
+
+// ---- AUTENTICACION ----
 // mensaje de codigo
 func SendCodeMessage(to, code string) error {
 	tokenMETA, _ := os.LookupEnv("META_BUSSINES_TOKEN")
@@ -197,7 +241,256 @@ func SendDefaultMsgRegistration(to string) error {
 	return err
 }
 
-func SendNewProduct(codePhone, phone int, userName, kindName, forGender string) error {
+// ---- confirmacion de darse de baja ----
+func SendConfirmDeleteUser(to string) error {
+	// obtener las variables de entorno
+	tokenMETA, _ := os.LookupEnv("META_BUSSINES_TOKEN")
+
+	versionWP, _ := os.LookupEnv("WP_API_VERSION")
+	phoneIdWP, _ := os.LookupEnv("WP_PHONE_ID")
+	// estableciendo template
+	jsonStr := []byte(`{
+		"messaging_product": "whatsapp",
+		"to": "` + to + `",
+		"type": "template",
+		"template": {
+			"name": "eliminar_usuario",
+			"language": {
+				"code": "es",
+			},
+		}
+	}`)
+	// estableciendo parametros de consulta consulta a la api
+	req, err := http.NewRequest("POST", "https://graph.facebook.com/v"+versionWP+"/"+phoneIdWP+"/messages", bytes.NewBuffer(jsonStr))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+tokenMETA)
+	// realizando consulta
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	// verificando una respuesta correcta
+	if resp.StatusCode != 200 {
+		return err
+	}
+
+	return err
+}
+
+// ---- confirmacion en inactivarse ----
+func SendConfirmInactiveUser(to string) error {
+	// obtener las variables de entorno
+	tokenMETA, _ := os.LookupEnv("META_BUSSINES_TOKEN")
+
+	versionWP, _ := os.LookupEnv("WP_API_VERSION")
+	phoneIdWP, _ := os.LookupEnv("WP_PHONE_ID")
+	// estableciendo template
+	jsonStr := []byte(`{
+		"messaging_product": "whatsapp",
+		"to": "` + to + `",
+		"type": "template",
+		"template": {
+			"name": "inactivar_usuario",
+			"language": {
+				"code": "es",
+			},
+		}
+	}`)
+	// estableciendo parametros de consulta consulta a la api
+	req, err := http.NewRequest("POST", "https://graph.facebook.com/v"+versionWP+"/"+phoneIdWP+"/messages", bytes.NewBuffer(jsonStr))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+tokenMETA)
+	// realizando consulta
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	// verificando una respuesta correcta
+	if resp.StatusCode != 200 {
+		return err
+	}
+
+	return err
+}
+
+// ---- preguntar para reactivar ----
+func SendReactive(to string) error {
+	// obtener las variables de entorno
+	tokenMETA, _ := os.LookupEnv("META_BUSSINES_TOKEN")
+
+	versionWP, _ := os.LookupEnv("WP_API_VERSION")
+	phoneIdWP, _ := os.LookupEnv("WP_PHONE_ID")
+	// estableciendo template
+	jsonStr := []byte(`{
+		"messaging_product": "whatsapp",
+		"to": "` + to + `",
+		"type": "template",
+		"template": {
+			"name": "reactivar_usuario",
+			"language": {
+				"code": "es",
+			},
+		}
+	}`)
+	// estableciendo parametros de consulta consulta a la api
+	req, err := http.NewRequest("POST", "https://graph.facebook.com/v"+versionWP+"/"+phoneIdWP+"/messages", bytes.NewBuffer(jsonStr))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+tokenMETA)
+	// realizando consulta
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	// verificando una respuesta correcta
+	if resp.StatusCode != 200 {
+		return err
+	}
+
+	return err
+}
+
+// ---- preguntar para reactivar ----
+func SendDelUser(to string) error {
+	// obtener las variables de entorno
+	tokenMETA, _ := os.LookupEnv("META_BUSSINES_TOKEN")
+
+	versionWP, _ := os.LookupEnv("WP_API_VERSION")
+	phoneIdWP, _ := os.LookupEnv("WP_PHONE_ID")
+	// estableciendo template
+	jsonStr := []byte(`{
+		"messaging_product": "whatsapp",
+		"to": "` + to + `",
+		"type": "template",
+		"template": {
+			"name": "eliminar_usuario",
+			"language": {
+				"code": "es",
+			},
+		}
+	}`)
+	// estableciendo parametros de consulta consulta a la api
+	req, err := http.NewRequest("POST", "https://graph.facebook.com/v"+versionWP+"/"+phoneIdWP+"/messages", bytes.NewBuffer(jsonStr))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+tokenMETA)
+	// realizando consulta
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	// verificando una respuesta correcta
+	if resp.StatusCode != 200 {
+		return err
+	}
+
+	return err
+}
+
+// ---- MAS OPCIONES ----
+// ---- mas opciones (pagina cero) ----
+func SendMoreOpts(to string) error {
+	// obtener las variables de entorno
+	tokenMETA, _ := os.LookupEnv("META_BUSSINES_TOKEN")
+
+	versionWP, _ := os.LookupEnv("WP_API_VERSION")
+	phoneIdWP, _ := os.LookupEnv("WP_PHONE_ID")
+	// estableciendo template
+	jsonStr := []byte(`{
+		"messaging_product": "whatsapp",
+		"to": "` + to + `",
+		"type": "template",
+		"template": {
+			"name": "mas_opciones_cero",
+			"language": {
+				"code": "es",
+			},
+		}
+	}`)
+	// estableciendo parametros de consulta consulta a la api
+	req, err := http.NewRequest("POST", "https://graph.facebook.com/v"+versionWP+"/"+phoneIdWP+"/messages", bytes.NewBuffer(jsonStr))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+tokenMETA)
+	// realizando consulta
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	// verificando una respuesta correcta
+	if resp.StatusCode != 200 {
+		return err
+	}
+
+	return err
+}
+
+// ---- mas opciones (pagina uno) ----
+func SendMoreOptsOne(to string) error {
+	// obtener las variables de entorno
+	tokenMETA, _ := os.LookupEnv("META_BUSSINES_TOKEN")
+
+	versionWP, _ := os.LookupEnv("WP_API_VERSION")
+	phoneIdWP, _ := os.LookupEnv("WP_PHONE_ID")
+	// estableciendo template
+	jsonStr := []byte(`{
+		"messaging_product": "whatsapp",
+		"to": "` + to + `",
+		"type": "template",
+		"template": {
+			"name": "mas_opciones_uno",
+			"language": {
+				"code": "es",
+			},
+		}
+	}`)
+	// estableciendo parametros de consulta consulta a la api
+	req, err := http.NewRequest("POST", "https://graph.facebook.com/v"+versionWP+"/"+phoneIdWP+"/messages", bytes.NewBuffer(jsonStr))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+tokenMETA)
+	// realizando consulta
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	// verificando una respuesta correcta
+	if resp.StatusCode != 200 {
+		return err
+	}
+
+	return err
+}
+
+// ---- NOTIFICACIONES ----
+// ---- enviar notificacion de nuevo producto ----
+func SendNotificationFromNewProducts(codePhone, phone int, userName, kindName, forGender string) error {
 	tokenMETA, _ := os.LookupEnv("META_BUSSINES_TOKEN")
 
 	versionWP, _ := os.LookupEnv("WP_API_VERSION")
@@ -255,47 +548,8 @@ func SendNewProduct(codePhone, phone int, userName, kindName, forGender string) 
 	return err
 }
 
-func SendResponseAnyMessage(codePhone, phone int, msg string) error {
-	tokenMETA, _ := os.LookupEnv("META_BUSSINES_TOKEN")
-
-	versionWP, _ := os.LookupEnv("WP_API_VERSION")
-	phoneIdWP, _ := os.LookupEnv("WP_PHONE_ID")
-
-	codePhoneStr, phoneStr := strconv.Itoa(codePhone), strconv.Itoa(phone)
-
-	to := codePhoneStr + phoneStr
-
-	jsonStr := []byte(`{
-		"messaging_product": "whatsapp",
-		"to": "` + to + `",
-		"type": "text",
-		"text": {
-			"body: "` + msg + `"
-		}
-	}`)
-
-	req, err := http.NewRequest("POST", "https://graph.facebook.com/v"+versionWP+"/"+phoneIdWP+"/messages", bytes.NewBuffer(jsonStr))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+tokenMETA)
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		return err
-	}
-
-	return err
-
-}
-
+// ---- PRODUCTOS ----
+// ---- enviar imagen del producto ----
 func SendImageByLink(codePhone, phone int, linkImg string) error {
 	tokenMETA, _ := os.LookupEnv("META_BUSSINES_TOKEN")
 

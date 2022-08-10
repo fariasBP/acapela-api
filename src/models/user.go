@@ -32,12 +32,12 @@ type (
 		Code               string             `json:"code" bson:"code,omitempty"`
 		Rol                int                `json:"rol" bson:"rol,omitempty"`
 		Phone              int                `json:"phone" bson:"phone"`
-		Notifications      bool               `json:"notifications" bson:"notifications"`
+		Sleep              uint8              `json:"sleep" bson:"sleep,omitempty"`
 		WpRegistration     bool               `json:"wp_registration" bson:"wp_registration"`
 		CreateDate         time.Time          `json:"create_date" bson:"create_date,omitempty"`
 		UpdateDate         time.Time          `json:"update_date" bson:"update_date,omitempty"`
 		CodeDate           time.Time          `json:"code_date" bson:"code_date,omitempty"`
-		SleepDate          time.Time          `json:"inactive_date" bson:"inactive_date,omitempty"`
+		SleepDate          time.Time          `json:"sleep_date" bson:"sleep_date,omitempty"`
 		WpRegistrationDate time.Time          `json:"wp_registration_date" bson:"wp_registration_date,omitempty"`
 	}
 )
@@ -152,14 +152,14 @@ func GetPhoneNameNotificationsFromUsers() ([]User, error) {
 }
 
 // ---- obtener numero y nombre para notificaciones ----
-func GetPhoneAndNameForNotifications() ([]User, error) {
+func GetPhoneAndNameForNotificationsFromClients() ([]User, error) {
 	// Conectando a la BBDD
 	ctx, client, coll := config.ConnectColl("users")
 	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 	// consultando
-	opts := options.Find().SetProjection(bson.M{"name": 1, "phone": 1, "code": 1})
-	filter := bson.M{"notifications": true}
+	opts := options.Find().SetProjection(bson.M{"name": 1, "phone": 1})
+	filter := bson.M{"$and": bson.M{"sleep": 0, "rol": 4}}
 	cursor, err := coll.Find(ctx, filter, opts)
 	if err != nil {
 		return nil, err
@@ -224,7 +224,7 @@ func ExistsSellerIDStr(id string) bool {
 	userModel := &User{}
 	err = coll.FindOne(ctx, filter).Decode(userModel)
 
-	return err != nil
+	return err == nil
 }
 
 // ---- verificar si existe el id string del comprador ----
@@ -247,8 +247,25 @@ func ExistsBuyerIDStr(id string) bool {
 
 	return err == nil
 }
+func VerifyActiveUserByPhone(phone string) bool {
+	// Conectandose a la DDBB
+	ctx, client, coll := config.ConnectColl("users")
+	defer fmt.Println("Disconnected DB")
+	defer client.Disconnect(ctx)
+	// verificar si el usuario esta activo
+	user := &User{}
+	err := coll.FindOne(ctx, bson.M{"phone": phone}).Decode(user)
+	if err != nil {
+		return false
+	}
+	if (user.CodeDate == time.Time{} || user.Sleep == 0) {
+		return true
+	}
+	return false
+}
 
 // ---- ACTUALIZAR USUARIO ----
+// ---- actualizar nombre de usuario ----
 func UpdUserNameByPhone(phone int, name string) error {
 	// Conectandose a la DDBB
 	ctx, client, coll := config.ConnectColl("users")
@@ -257,6 +274,54 @@ func UpdUserNameByPhone(phone int, name string) error {
 	// consultando
 	update := bson.M{"$set": bson.M{"name": strings.ToLower(strings.TrimSpace(name)), "wp_registration": false}}
 	_, err := coll.UpdateOne(ctx, bson.M{"phone": phone}, update)
+
+	return err
+}
+
+// ---- inactivar usuario ----
+func UpdInactiveUserByPhone(phone int, sleep uint8) error {
+	// Conectandose a la DDBB
+	ctx, client, coll := config.ConnectColl("users")
+	defer fmt.Println("Disconnected DB")
+	defer client.Disconnect(ctx)
+	// consultando
+	update := bson.M{
+		"$set": bson.M{
+			"sleep":      sleep,
+			"sleep_date": time.Now(),
+		},
+	}
+	_, err := coll.UpdateOne(ctx, bson.M{"phone": phone}, update)
+
+	return err
+}
+
+// ---- reactivar usuario ----
+func UpdReactiveUserByPhone(phone int) error {
+	// Conectandose a la DDBB
+	ctx, client, coll := config.ConnectColl("users")
+	defer fmt.Println("Disconnected DB")
+	defer client.Disconnect(ctx)
+	// consultando
+	update := bson.M{
+		"$set": bson.M{
+			"sleep":      0,
+			"sleep_date": time.Time{},
+		},
+	}
+	_, err := coll.UpdateOne(ctx, bson.M{"phone": phone}, update)
+
+	return err
+}
+
+// ---- ELIMINAR USUARIO ----
+func DelUserByPhone(phone int) error {
+	// Conectandose a la DDBB
+	ctx, client, coll := config.ConnectColl("users")
+	defer fmt.Println("Disconnected DB")
+	defer client.Disconnect(ctx)
+	// consultando
+	_, err := coll.DeleteOne(ctx, bson.M{"phone": phone})
 
 	return err
 }

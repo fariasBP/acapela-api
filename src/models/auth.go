@@ -15,12 +15,11 @@ import (
 func AdminEmployRegistrar(name string, phone int) error {
 	// Valores del Usuario
 	nUserRegister := &User{
-		Name:          strings.ToLower(strings.TrimSpace(name)),
-		Rol:           2,
-		Phone:         phone,
-		Notifications: false,
-		CreateDate:    time.Now(),
-		UpdateDate:    time.Now(),
+		Name:       strings.ToLower(strings.TrimSpace(name)),
+		Rol:        2,
+		Phone:      phone,
+		CreateDate: time.Now(),
+		UpdateDate: time.Now(),
 	}
 	// Conectando a la BBDD
 	ctx, client, coll := config.ConnectColl("users")
@@ -36,12 +35,11 @@ func AdminEmployRegistrar(name string, phone int) error {
 func EmployRegistrar(name string, phone int) error {
 	// valores de usuario
 	nUserRegister := &User{
-		Name:          strings.ToLower(strings.TrimSpace(name)),
-		Rol:           3,
-		Phone:         phone,
-		Notifications: false,
-		CreateDate:    time.Now(),
-		UpdateDate:    time.Now(),
+		Name:       strings.ToLower(strings.TrimSpace(name)),
+		Rol:        3,
+		Phone:      phone,
+		CreateDate: time.Now(),
+		UpdateDate: time.Now(),
 	}
 	// conectando a la BBDD
 	ctx, client, coll := config.ConnectColl("users")
@@ -57,12 +55,11 @@ func EmployRegistrar(name string, phone int) error {
 func ClientRegistrar(name string, phone int) error {
 	// valores de usuario
 	nUserRegister := &User{
-		Name:          strings.ToLower(strings.TrimSpace(name)),
-		Rol:           4,
-		Phone:         phone,
-		Notifications: true,
-		CreateDate:    time.Now(),
-		UpdateDate:    time.Now(),
+		Name:       strings.ToLower(strings.TrimSpace(name)),
+		Rol:        4,
+		Phone:      phone,
+		CreateDate: time.Now(),
+		UpdateDate: time.Now(),
 	}
 	// conectando a BBDD
 	ctx, client, coll := config.ConnectColl("users")
@@ -78,12 +75,11 @@ func ClientRegistrar(name string, phone int) error {
 func AutoClientRegistrar(name string, phone int) error {
 	// valores de usuario
 	nUserRegister := &User{
-		Name:          strings.ToLower(strings.TrimSpace(name)),
-		Rol:           4,
-		Phone:         phone,
-		Notifications: true,
-		CreateDate:    time.Now(),
-		UpdateDate:    time.Now(),
+		Name:       strings.ToLower(strings.TrimSpace(name)),
+		Rol:        4,
+		Phone:      phone,
+		CreateDate: time.Now(),
+		UpdateDate: time.Now(),
 	}
 	// conectando a la BBDD
 	ctx, client, coll := config.ConnectColl("users")
@@ -101,7 +97,6 @@ func AutoClientRegistrarWithWP(phone int) error {
 		Rol:                4,
 		Phone:              phone,
 		WpRegistration:     true,
-		Notifications:      true,
 		CreateDate:         time.Now(),
 		UpdateDate:         time.Now(),
 		WpRegistrationDate: time.Now(),
@@ -121,14 +116,13 @@ func AutoClientRegistrarWithWP(phone int) error {
 func CreateAdminBoss(name, lastname, email string, phone int) error {
 	// valores del super usuario
 	nUser := &User{
-		Name:          strings.ToLower(strings.TrimSpace(name)),
-		Lastname:      strings.ToLower(strings.TrimSpace(name)),
-		Email:         strings.TrimSpace(email),
-		Rol:           1,
-		Phone:         phone,
-		Notifications: false,
-		CreateDate:    time.Now(),
-		UpdateDate:    time.Now(),
+		Name:       strings.ToLower(strings.TrimSpace(name)),
+		Lastname:   strings.ToLower(strings.TrimSpace(name)),
+		Email:      strings.TrimSpace(email),
+		Rol:        1,
+		Phone:      phone,
+		CreateDate: time.Now(),
+		UpdateDate: time.Now(),
 	}
 	// Conectandose a la DDBB
 	ctx, client, coll := config.ConnectColl("users")
