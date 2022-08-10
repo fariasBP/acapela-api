@@ -55,7 +55,7 @@ func SendCodeWp(c echo.Context) error {
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
 	}
 	// verificar si esta inactivo
-	active := models.VerifyActiveUserByPhone(strconv.Itoa(body.Phone))
+	active := models.VerifyActiveUserByPhone(body.Phone)
 	if !active {
 		middlewares.SendReactive(strconv.Itoa(body.Phone))
 		return c.JSON(200, config.SetRes(200, "Usuario no esta inactivo enviando mensajes para reactivarse reactive."))
@@ -100,7 +100,7 @@ func SendConfirmInactiveWp(c echo.Context) error {
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
 	}
 	// verificar si esta inactivo
-	verify := models.VerifyActiveUserByPhone(strconv.Itoa(body.Phone))
+	verify := models.VerifyActiveUserByPhone(body.Phone)
 	if !verify {
 		middlewares.SendReactive(strconv.Itoa(body.Phone))
 		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))
@@ -129,7 +129,7 @@ func SendConfirmDeleteWp(c echo.Context) error {
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
 	}
 	// verificar si esta inactivo
-	verify := models.VerifyActiveUserByPhone(strconv.Itoa(body.Phone))
+	verify := models.VerifyActiveUserByPhone(body.Phone)
 	if !verify {
 		middlewares.SendReactive(strconv.Itoa(body.Phone))
 		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))
@@ -158,7 +158,7 @@ func DeleteUserWp(c echo.Context) error {
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
 	}
 	// verificar si esta inactivo
-	verify := models.VerifyActiveUserByPhone(strconv.Itoa(body.Phone))
+	verify := models.VerifyActiveUserByPhone(body.Phone)
 	if !verify {
 		middlewares.SendReactive(strconv.Itoa(body.Phone))
 		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))
@@ -188,7 +188,7 @@ func InactiveUserWp(c echo.Context) error {
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
 	}
 	// verificar si esta inactivo
-	verify := models.VerifyActiveUserByPhone(strconv.Itoa(body.Phone))
+	verify := models.VerifyActiveUserByPhone(body.Phone)
 	if !verify {
 		middlewares.SendReactive(strconv.Itoa(body.Phone))
 		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))
@@ -242,7 +242,7 @@ func DelUserTemplateWp(c echo.Context) error {
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
 	}
 	// verificar si esta inactivo
-	verify := models.VerifyActiveUserByPhone(strconv.Itoa(body.Phone))
+	verify := models.VerifyActiveUserByPhone(body.Phone)
 	if !verify {
 		middlewares.SendReactive(strconv.Itoa(body.Phone))
 		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))
@@ -303,7 +303,7 @@ func SendDefaultMessageWp(c echo.Context) error {
 		return c.JSON(200, config.SetRes(200, "Se cambio el nombre correctamente"))
 	}
 	// verificar si esta inactivo
-	verify := models.VerifyActiveUserByPhone(strconv.Itoa(body.Phone))
+	verify := models.VerifyActiveUserByPhone(body.Phone)
 	if !verify {
 		middlewares.SendReactive(strconv.Itoa(body.Phone))
 		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))
@@ -331,7 +331,7 @@ func SendLocationMessageWp(c echo.Context) error {
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
 	}
 	// verificar si esta inactivo
-	verify := models.VerifyActiveUserByPhone(strconv.Itoa(body.Phone))
+	verify := models.VerifyActiveUserByPhone(body.Phone)
 	if !verify {
 		middlewares.SendReactive(strconv.Itoa(body.Phone))
 		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))
@@ -361,7 +361,7 @@ func SendMoreOptWp(c echo.Context) error {
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
 	}
 	// verificar si esta inactivo
-	verify := models.VerifyActiveUserByPhone(strconv.Itoa(body.Phone))
+	verify := models.VerifyActiveUserByPhone(body.Phone)
 	if !verify {
 		middlewares.SendReactive(strconv.Itoa(body.Phone))
 		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))
@@ -390,7 +390,7 @@ func SendMoreOptOneWp(c echo.Context) error {
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
 	}
 	// verificar si esta inactivo
-	verify := models.VerifyActiveUserByPhone(strconv.Itoa(body.Phone))
+	verify := models.VerifyActiveUserByPhone(body.Phone)
 	if !verify {
 		middlewares.SendReactive(strconv.Itoa(body.Phone))
 		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))
@@ -457,7 +457,7 @@ func templateVerifyInit(body *models.User, c echo.Context) error {
 		return c.JSON(200, config.SetRes(200, "Se cambio el nombre correctamente"))
 	}
 	// verificar si esta inactivo
-	verify := models.VerifyActiveUserByPhone(strconv.Itoa(body.Phone))
+	verify := models.VerifyActiveUserByPhone(body.Phone)
 	if !verify {
 		middlewares.SendReactive(strconv.Itoa(body.Phone))
 		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))

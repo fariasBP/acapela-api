@@ -247,7 +247,7 @@ func ExistsBuyerIDStr(id string) bool {
 
 	return err == nil
 }
-func VerifyActiveUserByPhone(phone string) bool {
+func VerifyActiveUserByPhone(phone int) bool {
 	// Conectandose a la DDBB
 	ctx, client, coll := config.ConnectColl("users")
 	defer fmt.Println("Disconnected DB")
@@ -255,18 +255,12 @@ func VerifyActiveUserByPhone(phone string) bool {
 	// verificar si el usuario esta activo
 	user := &User{}
 	err := coll.FindOne(ctx, bson.M{"phone": phone}).Decode(user)
-	fmt.Println("DESDE VERIFY ACTIVE")
-	fmt.Println(user)
-	fmt.Println("VIENDO SLEEP")
-	fmt.Println(user.Sleep)
+	fmt.Println(user.CodeDate == time.Time{})
 	fmt.Println(user.Sleep == 0)
 	if err != nil {
-		fmt.Println("hubo un problema:")
-		fmt.Println(err)
 		return false
 	}
 	if (user.CodeDate == time.Time{} || user.Sleep == 0) {
-		fmt.Println("ESTAMOS AQUI")
 		return true
 	}
 	return false
