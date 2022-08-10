@@ -255,6 +255,8 @@ func VerifyActiveUserByPhone(phone int) bool {
 	// verificar si el usuario esta activo
 	user := &User{}
 	err := coll.FindOne(ctx, bson.M{"phone": phone}).Decode(user)
+	fmt.Println(user.CodeDate)
+	fmt.Println(time.Time{})
 	fmt.Println(user.CodeDate == time.Time{})
 	fmt.Println(user.Sleep == 0)
 	if err != nil {
