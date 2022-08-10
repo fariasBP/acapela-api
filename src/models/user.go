@@ -257,6 +257,8 @@ func VerifyActiveUserByPhone(phone string) bool {
 	err := coll.FindOne(ctx, bson.M{"phone": phone}).Decode(user)
 	fmt.Println("DESDE VERIFY ACTIVE")
 	fmt.Println(user)
+	fmt.Println("VIENDO SLEEP")
+	fmt.Println(user.Sleep)
 	if err != nil {
 		return false
 	}
