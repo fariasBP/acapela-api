@@ -27,18 +27,17 @@ func RegistrationWp(c echo.Context) error {
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
 	}
 	// crear usuario
-	err := models.AutoClientRegistrarWithWP(body.Phone)
+	err := models.AutoClientRegistrar(body.Phone, body.Name)
 	if err != nil {
 		middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se pudo registrar tu número comunicate por whatsapp al número 69804340.")
 		return c.JSON(500, config.SetResError(500, "Error: al crear cliente en la BBDD", err.Error()))
 	}
-	// enviar mensaje del codigo por whatsapp
-	err = middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "Su número se registro con exito, solo falta ingresar su nombre para completar con el registro...")
+	// enviar el mensaje de bienvenida
+	err = middlewares.SendWelcomeMessage(strconv.Itoa(body.Phone), body.Name)
 	if err != nil {
-		return c.JSON(500, config.SetResError(500, "Error: al enviar codigo via whatsapp", err.Error()))
+		return c.JSON(500, config.SetResError(500, "Error: no se pudo enviar el mensaje de bienvenida", err.Error()))
 	}
-
-	return c.JSON(200, config.SetRes(200, "Codigo creado"))
+	return c.JSON(200, config.SetRes(200, "Usuario creado"))
 }
 
 // ---- enviar codigo ----
@@ -283,24 +282,10 @@ func SendDefaultMessageWp(c echo.Context) error {
 	_ = json.NewDecoder(d).Decode(body)
 	defer d.Close()
 	// verficar si existe el usuario
-	user, err := models.GetUserByPhone(body.Phone)
-	if err != nil {
+	exists := models.ExistsPhone(body.Phone)
+	if !exists {
 		middlewares.SendDefaultMsgRegistration(strconv.Itoa(body.Phone))
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
-	}
-	// verficar si es un auto registration
-	if user.WpRegistration && (time.Now().UTC().Before(user.WpRegistrationDate.Add((time.Minute))) || time.Time{} == user.WpRegistrationDate) {
-		err = models.UpdUserNameByPhone(body.Phone, body.Name)
-		if err != nil {
-			middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se pudo registrar el nombre. Si tiene alguna duda o consulta envie un mensaje via whatsapp al 69804340.")
-			return c.JSON(500, config.SetResError(500, "Error: No se pudo actualizar el nombre", err.Error()))
-		}
-		err = middlewares.SendWelcomeMessage(strconv.Itoa(body.Phone), body.Name)
-		if err != nil {
-			middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se pude enviar el mensaje de bienvenida.")
-			return c.JSON(500, config.SetResError(500, "Error: No se pudo enviar el mensaje de bienvenida", err.Error()))
-		}
-		return c.JSON(200, config.SetRes(200, "Se cambio el nombre correctamente"))
 	}
 	// verificar si esta inactivo
 	active := models.VerifyActiveUserByPhone(body.Phone)
@@ -309,7 +294,7 @@ func SendDefaultMessageWp(c echo.Context) error {
 		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))
 	}
 	// enviando mensaje default
-	err = middlewares.SendDefaultMessageNoCommand(strconv.Itoa(body.Phone))
+	err := middlewares.SendDefaultMessageNoCommand(strconv.Itoa(body.Phone))
 	if err != nil {
 		return c.JSON(400, config.SetResError(400, "Error: al enviar mensaje whatsapp", err.Error()))
 	}
@@ -434,33 +419,3 @@ func SendMoreOptOneWp(c echo.Context) error {
 
 // 	return c.JSON(200, config.SetRes(200, "Se envio los mesajes masivos correctamente"))
 // }
-
-func templateVerifyInit(body *models.User, c echo.Context) error {
-	// verficar si existe el usuario
-	user, err := models.GetUserByPhone(body.Phone)
-	if err != nil {
-		middlewares.SendDefaultMsgRegistration(strconv.Itoa(body.Phone))
-		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
-	}
-	// verficar si es un auto registration
-	if user.WpRegistration && (time.Now().UTC().Before(user.WpRegistrationDate.Add((time.Minute))) || time.Time{} == user.WpRegistrationDate) {
-		err = models.UpdUserNameByPhone(body.Phone, body.Name)
-		if err != nil {
-			middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se pudo registrar el nombre. Si tiene alguna duda o consulta envie un mensaje via whatsapp al 69804340.")
-			return c.JSON(500, config.SetResError(500, "Error: No se pudo actualizar el nombre", err.Error()))
-		}
-		err = middlewares.SendWelcomeMessage(strconv.Itoa(body.Phone), body.Name)
-		if err != nil {
-			middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se pude enviar el mensaje de bienvenida.")
-			return c.JSON(500, config.SetResError(500, "Error: No se pudo enviar el mensaje de bienvenida", err.Error()))
-		}
-		return c.JSON(200, config.SetRes(200, "Se cambio el nombre correctamente"))
-	}
-	// verificar si esta inactivo
-	verify := models.VerifyActiveUserByPhone(body.Phone)
-	if !verify {
-		middlewares.SendReactive(strconv.Itoa(body.Phone))
-		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))
-	}
-	return nil
-}

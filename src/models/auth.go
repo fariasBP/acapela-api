@@ -71,32 +71,31 @@ func ClientRegistrar(name string, phone int) error {
 	return err
 }
 
-// ---- clientes auto registrados (que se registran solos) ----
-func AutoClientRegistrar(name string, phone int) error {
-	// valores de usuario
-	nUserRegister := &User{
-		Name:       strings.ToLower(strings.TrimSpace(name)),
-		Rol:        4,
-		Phone:      phone,
-		CreateDate: time.Now(),
-		UpdateDate: time.Now(),
-	}
-	// conectando a la BBDD
-	ctx, client, coll := config.ConnectColl("users")
-	defer fmt.Println("Disconnected DB")
-	defer client.Disconnect(ctx)
-	// insertando
-	_, err := coll.InsertOne(ctx, nUserRegister)
+// // ---- clientes auto registrados (que se registran solos) ----
+// func AutoClientRegistrar(name string, phone int) error {
+// 	// valores de usuario
+// 	nUserRegister := &User{
+// 		Name:       strings.ToLower(strings.TrimSpace(name)),
+// 		Rol:        4,
+// 		Phone:      phone,
+// 		CreateDate: time.Now(),
+// 		UpdateDate: time.Now(),
+// 	}
+// 	// conectando a la BBDD
+// 	ctx, client, coll := config.ConnectColl("users")
+// 	defer fmt.Println("Disconnected DB")
+// 	defer client.Disconnect(ctx)
+// 	// insertando
+// 	_, err := coll.InsertOne(ctx, nUserRegister)
 
-	return err
-}
-func AutoClientRegistrarWithWP(phone int) error {
+// 	return err
+// }
+func AutoClientRegistrar(phone int, name string) error {
 	// valores del usuario
 	nUserRegister := &User{
-		Name:               "",
+		Name:               strings.ToLower(strings.TrimSpace(name)),
 		Rol:                4,
 		Phone:              phone,
-		WpRegistration:     true,
 		CreateDate:         time.Now(),
 		UpdateDate:         time.Now(),
 		WpRegistrationDate: time.Now(),

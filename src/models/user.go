@@ -33,7 +33,6 @@ type (
 		Rol                int                `json:"rol" bson:"rol,omitempty"`
 		Phone              int                `json:"phone" bson:"phone"`
 		Sleep              uint8              `json:"sleep" bson:"sleep,omitempty"`
-		WpRegistration     bool               `json:"wp_registration" bson:"wp_registration"`
 		CreateDate         time.Time          `json:"create_date" bson:"create_date,omitempty"`
 		UpdateDate         time.Time          `json:"update_date" bson:"update_date,omitempty"`
 		CodeDate           time.Time          `json:"code_date" bson:"code_date,omitempty"`
