@@ -259,6 +259,7 @@ func VerifyActiveUserByPhone(phone string) bool {
 	fmt.Println(user)
 	fmt.Println("VIENDO SLEEP")
 	fmt.Println(user.Sleep)
+	fmt.Println(user.Sleep == 0)
 	if err != nil {
 		return false
 	}
