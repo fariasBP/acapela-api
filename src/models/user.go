@@ -263,6 +263,7 @@ func VerifyActiveUserByPhone(phone string) bool {
 		return false
 	}
 	if (user.CodeDate == time.Time{} || user.Sleep == 0) {
+		fmt.Println("ESTAMOS AQUI")
 		return true
 	}
 	return false
