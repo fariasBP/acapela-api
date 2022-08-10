@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 
 	"github.com/fariasBP/acapela-api/src/config"
@@ -20,10 +21,12 @@ func Login(c echo.Context) error {
 	_ = json.NewDecoder(d).Decode(body)
 	defer d.Close()
 	// buscar usuario por numero
+	fmt.Println(body.Code)
 	user, err := models.GetUserByPhone(body.Phone)
 	if err != nil {
 		return c.JSON(404, config.SetResError(404, "Error: Numero de telefono no registrado.", err.Error()))
 	}
+	fmt.Println(body.Code == user.Code)
 	if user.Code != body.Code {
 		return c.JSON(400, config.SetRes(400, "Error: Codigo incorrecto"))
 	}
