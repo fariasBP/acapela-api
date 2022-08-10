@@ -22,7 +22,7 @@ func RegistrationWp(c echo.Context) error {
 	defer d.Close()
 	// verificando que existe el usuario
 	exists := models.ExistsPhone(body.Phone)
-	if exists {
+	if !exists {
 		middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "Pero si tu ya estas registrado, no podemos registrarte dos veces.")
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
 	}
@@ -55,10 +55,10 @@ func SendCodeWp(c echo.Context) error {
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
 	}
 	// verificar si esta inactivo
-	verify := models.VerifyActiveUserByPhone(strconv.Itoa(body.Phone))
-	if !verify {
+	active := models.VerifyActiveUserByPhone(strconv.Itoa(body.Phone))
+	if !active {
 		middlewares.SendReactive(strconv.Itoa(body.Phone))
-		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))
+		return c.JSON(200, config.SetRes(200, "Usuario no esta inactivo enviando mensajes para reactivarse reactive."))
 	}
 	// verificar si ha pasado 1 hora
 	if time.Now().UTC().After(user.CodeDate.Add(time.Minute)) {
@@ -95,7 +95,7 @@ func SendConfirmInactiveWp(c echo.Context) error {
 	defer d.Close()
 	// verficar si existe el usuario
 	exists := models.ExistsPhone(body.Phone)
-	if exists {
+	if !exists {
 		middlewares.SendDefaultMsgRegistration(strconv.Itoa(body.Phone))
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
 	}
@@ -124,7 +124,7 @@ func SendConfirmDeleteWp(c echo.Context) error {
 	defer d.Close()
 	// verficar si existe el usuario
 	exists := models.ExistsPhone(body.Phone)
-	if exists {
+	if !exists {
 		middlewares.SendDefaultMsgRegistration(strconv.Itoa(body.Phone))
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
 	}
@@ -153,7 +153,7 @@ func DeleteUserWp(c echo.Context) error {
 	defer d.Close()
 	// verficar si existe el usuario
 	exists := models.ExistsPhone(body.Phone)
-	if exists {
+	if !exists {
 		middlewares.SendDefaultMsgRegistration(strconv.Itoa(body.Phone))
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
 	}
@@ -183,7 +183,7 @@ func InactiveUserWp(c echo.Context) error {
 	defer d.Close()
 	// verficar si existe el usuario
 	exists := models.ExistsPhone(body.Phone)
-	if exists {
+	if !exists {
 		middlewares.SendDefaultMsgRegistration(strconv.Itoa(body.Phone))
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
 	}
@@ -213,7 +213,7 @@ func ReactiveUserWp(c echo.Context) error {
 	defer d.Close()
 	// verficar si existe el usuario
 	exists := models.ExistsPhone(body.Phone)
-	if exists {
+	if !exists {
 		middlewares.SendDefaultMsgRegistration(strconv.Itoa(body.Phone))
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
 	}
@@ -237,7 +237,7 @@ func DelUserTemplateWp(c echo.Context) error {
 	defer d.Close()
 	// verficar si existe el usuario
 	exists := models.ExistsPhone(body.Phone)
-	if exists {
+	if !exists {
 		middlewares.SendDefaultMsgRegistration(strconv.Itoa(body.Phone))
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
 	}
@@ -326,7 +326,7 @@ func SendLocationMessageWp(c echo.Context) error {
 	defer d.Close()
 	// verficar si existe el usuario
 	exists := models.ExistsPhone(body.Phone)
-	if exists {
+	if !exists {
 		middlewares.SendDefaultMsgRegistration(strconv.Itoa(body.Phone))
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
 	}
@@ -356,7 +356,7 @@ func SendMoreOptWp(c echo.Context) error {
 	defer d.Close()
 	// verficar si existe el usuario
 	exists := models.ExistsPhone(body.Phone)
-	if exists {
+	if !exists {
 		middlewares.SendDefaultMsgRegistration(strconv.Itoa(body.Phone))
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
 	}
@@ -385,7 +385,7 @@ func SendMoreOptOneWp(c echo.Context) error {
 	defer d.Close()
 	// verficar si existe el usuario
 	exists := models.ExistsPhone(body.Phone)
-	if exists {
+	if !exists {
 		middlewares.SendDefaultMsgRegistration(strconv.Itoa(body.Phone))
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
 	}
