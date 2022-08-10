@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+
+	"github.com/fonini/go-capitalize/capitalize"
 )
 
 // ---- UTILITARIOS ----
@@ -15,6 +17,11 @@ func SendWelcomeMessage(to, userName string) error {
 
 	versionWP, _ := os.LookupEnv("WP_API_VERSION")
 	phoneIdWP, _ := os.LookupEnv("WP_PHONE_ID")
+
+	name, err := capitalize.Capitalize(userName)
+	if err != nil {
+		name = userName
+	}
 
 	jsonStr := []byte(`{
 		"messaging_product": "whatsapp",
@@ -31,7 +38,7 @@ func SendWelcomeMessage(to, userName string) error {
 					"parameters": [
 						{
 							"type": "text",
-							"text": "` + userName + `",
+							"text": "` + name + `",
 						}
 					]
 				}

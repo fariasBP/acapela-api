@@ -8,7 +8,6 @@ import (
 	"github.com/fariasBP/acapela-api/src/config"
 	"github.com/fariasBP/acapela-api/src/middlewares"
 	"github.com/fariasBP/acapela-api/src/models"
-	"github.com/fonini/go-capitalize/capitalize"
 	"github.com/labstack/echo/v4"
 )
 
@@ -59,11 +58,7 @@ func InfoWeb(c echo.Context) error {
 	}
 
 	// enviar el primer mensaje whatsapp
-	name, err := capitalize.Capitalize(valName)
-	if err != nil {
-		name = valName
-	}
-	err = middlewares.SendWelcomeMessage(valPhone, name)
+	err = middlewares.SendWelcomeMessage(valPhone, valName)
 	if err != nil {
 		return c.JSON(200, config.SetResError(500, "Error: ususario fue registrado en BBDD pero no se envio el mensaje de bienvenida", err.Error()))
 	}
