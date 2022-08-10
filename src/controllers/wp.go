@@ -22,7 +22,7 @@ func RegistrationWp(c echo.Context) error {
 	defer d.Close()
 	// verificando que existe el usuario
 	exists := models.ExistsPhone(body.Phone)
-	if !exists {
+	if exists {
 		middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "Pero si tu ya estas registrado, no podemos registrarte dos veces.")
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
 	}
