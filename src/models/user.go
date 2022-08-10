@@ -261,6 +261,8 @@ func VerifyActiveUserByPhone(phone string) bool {
 	fmt.Println(user.Sleep)
 	fmt.Println(user.Sleep == 0)
 	if err != nil {
+		fmt.Println("hubo un problema:")
+		fmt.Println(err)
 		return false
 	}
 	if (user.CodeDate == time.Time{} || user.Sleep == 0) {
