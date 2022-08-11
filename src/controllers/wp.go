@@ -23,7 +23,7 @@ func SendCodeWp(c echo.Context) error {
 	_, exists, active, user, err := models.GetUserAndVerifyNotblockExitsAndActive(body.Phone)
 	if !exists {
 		middlewares.SendDefaultMsgRegistration(strconv.Itoa(body.Phone))
-		return c.JSON(400, config.SetResError(400, "Error: no existe el numero de telefono", err.Error()))
+		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
 	} else if !active {
 		middlewares.SendReactive(strconv.Itoa(body.Phone))
 		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))
