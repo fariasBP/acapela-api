@@ -32,7 +32,7 @@ func Login(c echo.Context) error {
 		return c.JSON(400, config.SetRes(400, "Error: Codigo incorrecto"))
 	}
 	// verificar si el codigo se envia antes de 1 hora
-	if time.Now().UTC().Before(user.CodeDate.Add(time.Hour)) {
+	if time.Now().UTC().After(user.CodeDate.Add(time.Hour)) {
 		return c.JSON(400, config.SetRes(400, "Error: Esta enviando un codigo caducado."))
 	}
 	// crear JWT
