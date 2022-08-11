@@ -127,8 +127,6 @@ func GetUserAndVerifyNotblockExitsAndActive(phone int) (bool, bool, bool, *User,
 	// Verificando que el usuario exista
 	user := &User{}
 	err = collUsers.FindOne(ctx, bson.M{"phone": phone}).Decode(user)
-	fmt.Println(phone)
-	fmt.Println(user)
 	if err != nil {
 		return true, false, false, user, err
 	}

@@ -19,17 +19,11 @@ func SendCodeWp(c echo.Context) error {
 	d := c.Request().Body
 	_ = json.NewDecoder(d).Decode(body)
 	defer d.Close()
-	// verificar que la app No este bloqueado, Exista y este activo el usuario
-	_, exists, active, user, err := models.GetUserAndVerifyNotblockExitsAndActive(body.Phone)
-	if !exists {
+	// verificando si existe el usuario
+	user, err := models.GetUserByPhone(body.Phone)
+	if err != nil {
 		middlewares.SendDefaultMsgRegistration(strconv.Itoa(body.Phone))
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
-	} else if !active {
-		middlewares.SendReactive(strconv.Itoa(body.Phone))
-		return c.JSON(200, config.SetRes(200, "Usuario esta inactivo"))
-	} else if err != nil {
-		middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "Hubo un problema intentalo de nuevo.")
-		return c.JSON(500, config.SetResError(500, "Error: no se pudo terminar la consulta", err.Error()))
 	}
 	// verificar si ha pasado 1 hora
 	if time.Now().UTC().After(user.CodeDate.Add(time.Hour)) {
