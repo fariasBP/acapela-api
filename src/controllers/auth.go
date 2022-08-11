@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/fariasBP/acapela-api/src/config"
 	"github.com/fariasBP/acapela-api/src/middlewares"
@@ -26,10 +27,13 @@ func Login(c echo.Context) error {
 	if err != nil {
 		return c.JSON(404, config.SetResError(404, "Error: Numero de telefono no registrado.", err.Error()))
 	}
-	fmt.Println(user.Code)
-	fmt.Println(body.Code == user.Code)
+	// verficando si el codigo es identico
 	if user.Code != body.Code {
 		return c.JSON(400, config.SetRes(400, "Error: Codigo incorrecto"))
+	}
+	// verificar si el codigo se envia antes de 1 hora
+	if time.Now().UTC().Before(user.CodeDate.Add(time.Hour)) {
+		return c.JSON(400, config.SetRes(400, "Error: Esta enviando un codigo caducado."))
 	}
 	// crear JWT
 	tokenString, expiresJWT, tokenErr := middlewares.CreateToken(user.ID.Hex(), uint8(user.Rol))
@@ -41,6 +45,39 @@ func Login(c echo.Context) error {
 }
 
 // ---- REGISTRADORES ----
+// ---- registration por WP ----
+func RegistrationWp(c echo.Context) error {
+	// obteniendo variables
+	body := &models.User{}
+	d := c.Request().Body
+	_ = json.NewDecoder(d).Decode(body)
+	defer d.Close()
+	// verificar que la app No este bloqueado, Exista y este activo el usuario
+	notblock, exists, _, _, err := models.GetUserAndVerifyNotblockExitsAndActive(body.Phone)
+	if !notblock {
+		middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "La api de acapela.shop esta en mantenimiento, por favor intentalo mas tarde.")
+		return c.JSON(500, config.SetRes(500, "Error: No se completa el proceso por que la api esta en mantenimiento"))
+	} else if exists {
+		middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "Pero si tu ya estas registrado, no podemos registrarte dos veces.")
+		return c.JSON(400, config.SetRes(400, "Error: Ya existe el numero de telefono"))
+	} else if err != nil {
+		middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "Hubo un problema intentalo de nuevo.")
+		return c.JSON(500, config.SetResError(500, "Error: no se pudo terminar la consulta", err.Error()))
+	}
+	// crear usuario
+	err = models.AutoClientRegistrar(body.Phone, body.Name)
+	if err != nil {
+		middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se pudo registrar tu número comunicate por whatsapp al número 69804340.")
+		return c.JSON(500, config.SetResError(500, "Error: al crear cliente en la BBDD", err.Error()))
+	}
+	// enviar el mensaje de bienvenida
+	err = middlewares.SendWelcomeMessage(strconv.Itoa(body.Phone), body.Name)
+	if err != nil {
+		return c.JSON(500, config.SetResError(500, "Error: no se pudo enviar el mensaje de bienvenida", err.Error()))
+	}
+	return c.JSON(200, config.SetRes(200, "Usuario creado"))
+}
+
 // ---- auto registrador ----
 // func Signup(c echo.Context) error {
 // 	// obteniendo variables

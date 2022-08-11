@@ -45,6 +45,13 @@ precesalemin - precio de rebaja minimo (cuando el cliente insiste en una rebaja)
 soldout - si el producto fue vendido.
 seller - vendedor
 gender - si el producto para hombres (1), para mujeres (2) o para ambos (3).
+modelquality - calidad del modelo
+	0 especial
+	1 primera
+	2 segunda
+	3 liquidacion
+	4 rezago
+materialquality - calidad del material ej./ 1/10 3/10, 10/10
 */
 
 func NewProduct(price, priceMin int, photos []string, kind string, models []string, gender int, size []int, modelQuality, materialQuality int) error {

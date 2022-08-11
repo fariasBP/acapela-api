@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -25,7 +26,7 @@ import (
 */
 type (
 	User struct {
-		ID                 primitive.ObjectID `bson:"_id,omitempty"`
+		ID                 primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 		Name               string             `json:"name" bson:"name,omitempty"`
 		Lastname           string             `json:"lastname" bson:"lastname,omitempty"`
 		Email              string             `json:"email" bson:"email,omitempty"`
@@ -104,6 +105,37 @@ func GetUserByIDStr(id string) (*User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+func GetUserAndVerifyNotblockExitsAndActive(phone int) (bool, bool, bool, *User, error) {
+	// variable entorno
+	appName, _ := os.LookupEnv("APP_NAME")
+	// Conectando a la BBDD
+	ctx, client, db := config.ConnectDB()
+	collApp := db.Collection("app")
+	collUsers := db.Collection("users")
+	defer fmt.Println("Disconnected DB")
+	defer client.Disconnect(ctx)
+	// verificando que no este en modo bloqueado
+	appVals := &App{}
+	err := collApp.FindOne(ctx, bson.M{"name": appName}).Decode(appVals)
+	if err != nil {
+		return false, false, false, nil, err
+	}
+	if appVals.Developing {
+		return false, false, false, nil, nil
+	}
+	// Verificando que el usuario exista
+	user := &User{}
+	err = collUsers.FindOne(ctx, bson.M{"phone": phone}).Decode(user)
+	if err != nil {
+		return true, false, false, user, err
+	}
+	// verificar si esta activo
+	if (user.Sleep != 0 || user.SleepDate != time.Time{}) {
+		return true, true, false, user, nil
+	}
+
+	return true, true, true, user, nil
 }
 
 // ---- OBTNER USUARIOS ----

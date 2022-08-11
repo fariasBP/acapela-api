@@ -24,6 +24,14 @@ func InfoWeb(c echo.Context) error {
 		Code:    200,
 		Msg:     "Hello World!!!",
 	}
+	// verificar si exista data app
+	existDaApp := models.ExistsAppData()
+	if !existDaApp {
+		err := models.CreateApp()
+		if err != nil {
+			return c.JSON(500, config.SetResError(500, "No se puede crear la app", err.Error()))
+		}
+	}
 	// Verificar que no exista un superusuario
 	existSuper := models.ExistsAdiminBoss()
 	if existSuper {
@@ -65,4 +73,22 @@ func InfoWeb(c echo.Context) error {
 
 	fmt.Println("El superusuario se ha creado")
 	return c.JSON(200, u)
+}
+
+func ChangeModeDev(c echo.Context) error {
+	err := models.UpdDevelopingApp(true)
+	if err != nil {
+		return c.JSON(500, config.SetResError(500, "Error: No se puede cambiar a modo dev", err.Error()))
+	}
+
+	return c.JSON(200, config.SetRes(200, "Se cambio a modo dev"))
+}
+
+func ChangeModeProd(c echo.Context) error {
+	err := models.UpdDevelopingApp(false)
+	if err != nil {
+		return c.JSON(500, config.SetResError(500, "Error: No se puede cambiar a modo prod", err.Error()))
+	}
+
+	return c.JSON(200, config.SetRes(200, "Se cambio a modo prod"))
 }
