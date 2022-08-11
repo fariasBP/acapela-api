@@ -8,6 +8,7 @@ import (
 
 func IndexRoute(e *echo.Echo) {
 	e.GET("/", controllers.InfoWeb)
-	e.POST("/modedev", controllers.ChangeModeDev, middlewares.IsBoss)
-	e.POST("/modeprod", controllers.ChangeModeProd, middlewares.IsBoss)
+	e.Group("/mode", middlewares.ValidateToken, middlewares.IsBoss)
+	e.POST("/dev", controllers.ChangeModeDev)
+	e.POST("/prod", controllers.ChangeModeProd)
 }
