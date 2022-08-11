@@ -20,11 +20,8 @@ func SendCodeWp(c echo.Context) error {
 	_ = json.NewDecoder(d).Decode(body)
 	defer d.Close()
 	// verificar que la app No este bloqueado, Exista y este activo el usuario
-	notblock, exists, active, user, err := models.GetUserAndVerifyNotblockExitsAndActive(body.Phone)
-	if !notblock {
-		middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "La api de acapela.shop esta en mantenimiento, por favor intentalo mas tarde.")
-		return c.JSON(500, config.SetRes(500, "Error: No se completa el proceso por que la api esta en mantenimiento"))
-	} else if !exists {
+	_, exists, active, user, err := models.GetUserAndVerifyNotblockExitsAndActive(body.Phone)
+	if !exists {
 		middlewares.SendDefaultMsgRegistration(strconv.Itoa(body.Phone))
 		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
 	} else if !active {
