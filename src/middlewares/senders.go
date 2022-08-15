@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"net/http"
 	"os"
-	"strconv"
 
 	"github.com/fonini/go-capitalize/capitalize"
 )
@@ -537,22 +536,23 @@ func SendMoreOptsOne(to string) error {
 
 // ---- NOTIFICACIONES ----
 // ---- enviar notificacion de nuevo producto ----
-func SendNotificationFromNewProducts(codePhone, phone int, userName, kindName, forGender string) error {
+func SendNotificationFromNewProducts(to, userName, kindName, forGender string) error {
 	tokenMETA, _ := os.LookupEnv("META_BUSSINES_TOKEN")
 
 	versionWP, _ := os.LookupEnv("WP_API_VERSION")
 	phoneIdWP, _ := os.LookupEnv("WP_PHONE_ID")
 
-	codePhoneStr, phoneStr := strconv.Itoa(codePhone), strconv.Itoa(phone)
-
-	to := codePhoneStr + phoneStr
+	name, err := capitalize.Capitalize(userName)
+	if err != nil {
+		name = userName
+	}
 
 	jsonStr := []byte(`{
 		"messaging_product": "whatsapp",
 		"to": "` + to + `",
 		"type": "template",
 		"template": {
-			"name": "nuevos_abrigos",
+			"name": "nuevos_productos",
 			"language": {
 				"code": "es",
 			},
@@ -562,7 +562,11 @@ func SendNotificationFromNewProducts(codePhone, phone int, userName, kindName, f
 					"parameters": [
 						{
 							"type": "text",
-							"text": "` + userName + `",
+							"text": "` + name + `",
+						},
+						{
+							"type": "text",
+							"text": "` + kindName + `",
 						},
 						{
 							"type": "text",
@@ -597,22 +601,18 @@ func SendNotificationFromNewProducts(codePhone, phone int, userName, kindName, f
 
 // ---- PRODUCTOS ----
 // ---- enviar imagen del producto ----
-func SendImageByLink(codePhone, phone int, linkImg string) error {
+func SendImageByLink(to, linkImg string) error {
 	tokenMETA, _ := os.LookupEnv("META_BUSSINES_TOKEN")
 
 	versionWP, _ := os.LookupEnv("WP_API_VERSION")
 	phoneIdWP, _ := os.LookupEnv("WP_PHONE_ID")
-
-	codePhoneStr, phoneStr := strconv.Itoa(codePhone), strconv.Itoa(phone)
-
-	to := codePhoneStr + phoneStr
 
 	jsonStr := []byte(`{
 		"messaging_product": "whatsapp",
 		"to": "` + to + `",
 		"type": "image",
 		"image": {
-			"link: "` + linkImg + `"
+			"link": "` + linkImg + `"
 		}
 	}`)
 

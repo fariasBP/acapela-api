@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -194,6 +195,34 @@ func SendMoreOptOneWp(c echo.Context) error {
 	}
 
 	return c.JSON(200, config.SetRes(200, "Se envio correctamente el mensaje"))
+}
+
+func SendImgsNewProductsWp(c echo.Context) error {
+	to := c.QueryParam("from")
+	fmt.Println(to)
+	products, err := models.GetNewProducts()
+
+	if err != nil {
+		middlewares.SendAnyMessageText(to, "No se pudo enviar los nuevos productos")
+		return c.JSON(500, config.SetResError(500, "Error: No se pudo enviar los nuevos productos", err.Error()))
+	}
+
+	var x int = 0
+
+	for _, v := range products {
+		err = middlewares.SendImageByLink(to, v.Photos[0])
+		if err != nil {
+			// middlewares.SendAnyMessageText(to, "No se pudo enviar las fotos de los nuevos productos")
+			// return c.JSON(500, config.SetResError(500, "Error: No se pudo enviar las fotos de los nuevos productos", err.Error()))
+			x++
+		}
+	}
+	if x > 0 {
+		middlewares.SendAnyMessageText(to, ("Hubo un problema: " + strconv.Itoa(x) + " fotos no se pudieron enviar de los nuevos productos."))
+		return c.JSON(500, config.SetResError(500, "Error: No se pudo enviar algunas fotos de los nuevos productos", err.Error()))
+	}
+
+	return c.JSON(200, config.SetRes(200, "Se envio correctamente los nuevos productos"))
 }
 
 // func SendMassMessagesFromNewProducts(c echo.Context) error {

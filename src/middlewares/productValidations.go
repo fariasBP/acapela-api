@@ -20,7 +20,7 @@ type (
 		Kind            string   `json:"kind" validate:"required"`
 		Models          []string `json:"models" validate:"required"`
 		Gender          int      `json:"gender" validate:"required,number"`
-		Size            []int    `json:"size" validate:"required"`
+		Size            []string `json:"size" validate:"required"`
 		Modelquality    int      `json:"model_quality" validate:"required,number"`
 		Materialquality int      `json:"material_quality" validate:"required,number"`
 	}

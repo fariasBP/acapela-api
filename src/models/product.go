@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/fariasBP/acapela-api/src/config"
@@ -21,13 +22,16 @@ type (
 		Kind            string             `json:"kind" bson:"kind,omitempty"`
 		Models          []string           `json:"models" bson:"models,omitempty"`
 		Gender          int                `json:"gender" bson:"gender,omitempty"`
-		Size            []int              `json:"size" bson:"size,omitempty"`
+		Size            []string           `json:"size" bson:"size,omitempty"`
 		ModelQuality    int                `json:"model_quality" bson:"model_quality,omitempty"`
 		MaterialQuality int                `json:"material_quality" bson:"material_quality,omitempty"`
 		NewPrice        int                `json:"new_price" bson:"new_price,omitempty"`
 		SellPrice       int                `json:"sell_price" bson:"sell_price,omitempty"`
 		Seller          string             `json:"seller" bson:"seller,omitempty"`
 		Buyer           string             `json:"buyer" bson:"buyer,omitempty"`
+		Day             int                `json:"day" bson:"day,omitempty"`
+		Month           time.Month         `json:"month" bson:"month,omitempty"`
+		Year            int                `json:"year" bson:"year,omitempty"`
 		CreateDate      time.Time          `json:"create_date" bson:"create_date,omitempty"`
 		UpdateDate      time.Time          `json:"update_date" bson:"update_date,omitempty"`
 	}
@@ -54,7 +58,7 @@ modelquality - calidad del modelo
 materialquality - calidad del material ej./ 1/10 3/10, 10/10
 */
 
-func NewProduct(price, priceMin int, photos []string, kind string, models []string, gender int, size []int, modelQuality, materialQuality int) error {
+func NewProduct(price, priceMin int, photos []string, kind string, models []string, gender int, size []string, modelQuality, materialQuality int) error {
 	newProduct := &Product{
 		Price:           price,
 		PriceMin:        priceMin,
@@ -65,15 +69,28 @@ func NewProduct(price, priceMin int, photos []string, kind string, models []stri
 		Size:            size,
 		ModelQuality:    modelQuality,
 		MaterialQuality: materialQuality,
-		CreateDate:      time.Now(),
-		UpdateDate:      time.Now(),
+		Day:             time.Now().UTC().Day(),
+		Month:           time.Now().UTC().Month(),
+		Year:            time.Now().UTC().Year(),
+		CreateDate:      time.Now().UTC(),
+		UpdateDate:      time.Now().UTC(),
 	}
 
-	ctx, client, coll := config.ConnectColl("products")
+	ctx, client, db := config.ConnectDB()
+	collProducts := db.Collection("products")
+	collApp := db.Collection("app")
 	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 
-	_, err := coll.InsertOne(context.Background(), newProduct)
+	appName, _ := os.LookupEnv("APP_NAME")
+
+	_, err := collProducts.InsertOne(ctx, newProduct)
+	if err != nil {
+		return err
+	}
+
+	_, err = collApp.UpdateOne(ctx, bson.M{"name": appName}, bson.M{"$set": bson.M{"set_products": time.Now().UTC()}})
+
 	return err
 }
 func GetAllProducts() ([]Product, error) {
@@ -96,10 +113,11 @@ func GetAllProducts() ([]Product, error) {
 }
 
 func GetProducts(limit int, page int) ([]Product, error) {
+	// conectando a la base de datos
 	ctx, client, coll := config.ConnectColl("products")
 	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
-
+	// obteniendo los ultimos abrigos
 	opts := options.Find().SetSort(bson.M{"create_date": -1}).SetLimit(int64(limit)).SetSkip(int64(page))
 	cursor, err := coll.Find(ctx, bson.M{}, opts)
 	if err != nil {
@@ -134,6 +152,53 @@ func SellProductWithBuyer(id primitive.ObjectID, sellprice int, seller, buyer st
 	_, err := coll.UpdateOne(context.Background(), bson.M{"_id": id}, update)
 
 	return err
+}
+func GetNewProducts() ([]Product, error) {
+	// conectando a BBDD
+	ctx, client, db := config.ConnectDB()
+	collProducts := db.Collection("products")
+	collApp := db.Collection("app")
+	defer fmt.Println("Disconnected DB")
+	defer client.Disconnect(ctx)
+
+	appName, _ := os.LookupEnv("APP_NAME")
+	// obteniendo el ultimo productDate registrado
+	app := &App{}
+	err := collApp.FindOne(ctx, bson.M{"name": appName}).Decode(app)
+	if err != nil {
+		return nil, err
+	}
+	lastYear, lastMonth, lastDay := app.SetProducts.Date()
+	// consultando
+	filter := bson.M{"$and": []bson.M{
+		bson.M{"day": lastDay},
+		bson.M{"month": lastMonth},
+		bson.M{"year": lastYear},
+	}}
+	cursor, err := collProducts.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var products []Product
+	if err = cursor.All(ctx, &products); err != nil {
+		return nil, err
+	}
+	if len(products) > 3 {
+		return products, nil
+	}
+	// enviando los 30 ultimos productos (-1 = descendente)
+	opts := options.Find().SetSort(bson.M{"create_date": -1}).SetLimit(30).SetSkip(0)
+	cursor, err = collProducts.Find(ctx, bson.M{}, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = cursor.All(ctx, &products); err != nil {
+		return nil, err
+	}
+	return products, nil
 }
 
 // VERIFICANDO SI EXISTE ID

@@ -12,8 +12,6 @@ import (
 )
 
 func UploadImage(c echo.Context) error {
-	fmt.Println("aqui en upload image")
-
 	// OBTENIENDO FUENTE
 	file, err := c.FormFile("file")
 	if err != nil {

@@ -9,6 +9,7 @@ import (
 func Product(e *echo.Echo) {
 	e.GET("/product/all", controllers.GetAllProducts)
 	e.GET("/product/products", controllers.GetProducts)
+	e.GET("/product/newproducts", controllers.GetNewProducts)
 	router := e.Group("/product", middlewares.ValidateToken)
 	router.POST("/create", controllers.CreateProduct,
 		middlewares.IsBossOrAdmin, middlewares.CreateProductValidate)

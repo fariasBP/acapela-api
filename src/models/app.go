@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/fariasBP/acapela-api/src/config"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -11,10 +12,11 @@ import (
 
 type (
 	App struct {
-		ID         primitive.ObjectID `json:"id" bson:"_id,omitempty"`
-		Name       string             `json:"name" bson:"name,omitempty"`
-		Developing bool               `json:"developing" bson:"developing,omitempty"`
-		Version    string             `json:"version" bson:"version,omitempty"`
+		ID          primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+		Name        string             `json:"name" bson:"name,omitempty"`
+		Developing  bool               `json:"developing" bson:"developing,omitempty"`
+		Version     string             `json:"version" bson:"version,omitempty"`
+		SetProducts time.Time          `json:"set_products" bson:"set_products,omitempty"`
 	}
 )
 
@@ -59,7 +61,7 @@ func UpdDevelopingApp(dev bool) error {
 
 	update := bson.M{"$set": bson.M{"developing": dev}}
 
-	_, err := coll.UpdateOne(ctx, bson.M{"Name": "Acapela"}, update)
+	_, err := coll.UpdateOne(ctx, bson.M{"name": "Acapela"}, update)
 
 	return err
 }

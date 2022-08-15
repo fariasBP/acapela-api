@@ -67,20 +67,30 @@ func GetAllProducts(c echo.Context) error {
 }
 
 func GetProducts(c echo.Context) error {
-
+	// oteniendo los querys
 	page, err := strconv.Atoi(c.QueryParam("page"))
 	if err != nil {
 		c.JSON(500, config.SetResError(500, "error: page no es un numero", err.Error()))
 	}
-
+	// estableciendo limite
 	limit := 2
-
+	// consultando a BBDD
 	products, err := models.GetProducts(limit, (page-1)*limit)
 	if err != nil {
 		c.JSON(500, config.SetResError(500, "error: not get products", err.Error()))
 	}
 
 	return c.JSON(200, config.SetResJson(200, "get products succesful", products))
+}
+
+func GetNewProducts(c echo.Context) error {
+	// consultando a BBDD
+	products, err := models.GetNewProducts()
+	if err != nil {
+		return c.JSON(500, config.SetResError(500, "Error: No se pudo obtener los nuevos productos de BBDD", err.Error()))
+	}
+
+	return c.JSON(200, config.SetResJson(200, "Se obtuvo los nuevos productos con exito", products))
 }
 
 func SellProduct(c echo.Context) error {

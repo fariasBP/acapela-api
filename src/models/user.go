@@ -160,26 +160,6 @@ func GetUsers() ([]User, error) {
 	return users, nil
 }
 
-// obtener numero nombre y si recibe notificaiones de usuario
-func GetPhoneNameNotificationsFromUsers() ([]User, error) {
-	// Conectando a la BBDD
-	ctx, client, coll := config.ConnectColl("users")
-	defer fmt.Println("Disconnected DB")
-	defer client.Disconnect(ctx)
-	// consultando
-	opts := options.Find().SetProjection(bson.M{"phone": 1, "name": 1, "notifications": 1})
-	cursor, err := coll.Find(ctx, bson.M{}, opts)
-	if err != nil {
-		return nil, err
-	}
-	defer cursor.Close(ctx)
-	var users []User
-	if err = cursor.All(ctx, &users); err != nil {
-		return nil, err
-	}
-	return users, nil
-}
-
 // ---- obtener numero y nombre para notificaciones ----
 func GetPhoneAndNameForNotificationsFromClients() ([]User, error) {
 	// Conectando a la BBDD
@@ -188,7 +168,10 @@ func GetPhoneAndNameForNotificationsFromClients() ([]User, error) {
 	defer client.Disconnect(ctx)
 	// consultando
 	opts := options.Find().SetProjection(bson.M{"name": 1, "phone": 1})
-	filter := bson.M{"$and": bson.M{"sleep": 0, "rol": 4}}
+	filter := bson.M{"$and": []bson.M{
+		bson.M{"sleep": 0},
+		bson.M{"rol": 4},
+	}}
 	cursor, err := coll.Find(ctx, filter, opts)
 	if err != nil {
 		return nil, err

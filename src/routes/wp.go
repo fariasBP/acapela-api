@@ -20,6 +20,7 @@ func WPRoute(e *echo.Echo) {
 	wp.POST("/reactive", controllers.ReactiveUserWp)
 	wp.POST("/deleteuser", controllers.SendConfirmDeleteWp)
 	wp.POST("/confirmdeleteuser", controllers.DeleteUserWp)
+	wp.GET("/newproducts", controllers.SendImgsNewProductsWp)
 	// mass := wp.Group("/mass", middlewares.IsBoss)
 	// mass.POST("/newproducts", controllers.SendMassMessagesFromNewProducts)
 }
