@@ -53,19 +53,16 @@ func RegistrationWp(c echo.Context) error {
 	_ = json.NewDecoder(d).Decode(body)
 	defer d.Close()
 	// verificar que la app No este bloqueado, Exista y este activo el usuario
-	notblock, exists, _, _, err := models.GetUserAndVerifyNotblockExitsAndActive(body.Phone)
+	notblock, exists, _, _, _ := models.GetUserAndVerifyNotblockExitsAndActive(body.Phone)
 	if !notblock {
 		middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "La api de acapela.shop esta en mantenimiento, por favor intentalo mas tarde.")
 		return c.JSON(500, config.SetRes(500, "Error: No se completa el proceso por que la api esta en mantenimiento"))
 	} else if exists {
 		middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "Pero si tu ya estas registrado, no podemos registrarte dos veces.")
 		return c.JSON(400, config.SetRes(400, "Error: Ya existe el numero de telefono"))
-	} else if err != nil {
-		middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "Hubo un problema intentalo de nuevo.")
-		return c.JSON(500, config.SetResError(500, "Error: no se pudo terminar la consulta", err.Error()))
 	}
 	// crear usuario
-	err = models.AutoClientRegistrar(body.Phone, body.Name)
+	err := models.AutoClientRegistrar(body.Phone, body.Name)
 	if err != nil {
 		middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se pudo registrar tu número comunicate por whatsapp al número 69804340.")
 		return c.JSON(500, config.SetResError(500, "Error: al crear cliente en la BBDD", err.Error()))
