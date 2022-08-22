@@ -8,5 +8,5 @@ import (
 
 func Notification(e *echo.Echo) {
 	router := e.Group("/notification", middlewares.ValidateToken)
-	router.GET("/newproducts", controllers.NotifyNewProducts, middlewares.IsBoss)
+	router.POST("/newproducts", controllers.NotifyNewProducts, middlewares.IsBoss)
 }

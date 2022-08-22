@@ -16,11 +16,14 @@ type (
 		Type   string `json:"type"`
 		Gender string `json:"gender"`
 	}
+	bodyNotifyMsg struct {
+		Msg string `json:"msg"`
+	}
 )
 
 func NotifyNewProducts(c echo.Context) error {
 	// obteniendo variables
-	body := &bodyNotify{}
+	body := &bodyNotifyMsg{}
 	d := c.Request().Body
 	_ = json.NewDecoder(d).Decode(body)
 	defer d.Close()
@@ -31,7 +34,7 @@ func NotifyNewProducts(c echo.Context) error {
 	}
 	// Enviando el mensaje
 	for _, v := range users {
-		err = middlewares.SendNotificationFromNewProducts(strconv.Itoa(v.Phone), v.Name, body.Type, body.Gender)
+		err = middlewares.SendNotificationFromNewProducts(strconv.Itoa(v.Phone), v.Name, body.Msg)
 		if err != nil {
 			fmt.Println("Error: no se pudo enviar el mensaje de notificacion", err.Error())
 		}

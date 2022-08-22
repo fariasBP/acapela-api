@@ -27,7 +27,7 @@ func SendWelcomeMessage(to, userName string) error {
 		"to": "` + to + `",
 		"type": "template",
 		"template": {
-			"name": "welcome_new_user",
+			"name": "mensaje_de_bienvenida_v2",
 			"language": {
 				"code": "es",
 			},
@@ -166,7 +166,7 @@ func SendDefaultMessageNoCommand(to string) error {
 		"to": "` + to + `",
 		"type": "template",
 		"template": {
-			"name": "no_se_reconoce_el_comando",
+			"name": "mensaje_por_defecto_v3",
 			"language": {
 				"code": "es",
 			},
@@ -536,7 +536,7 @@ func SendMoreOptsOne(to string) error {
 
 // ---- NOTIFICACIONES ----
 // ---- enviar notificacion de nuevo producto ----
-func SendNotificationFromNewProducts(to, userName, kindName, forGender string) error {
+func SendNotificationFromNewProducts(to, userName, msg string) error {
 	tokenMETA, _ := os.LookupEnv("META_BUSSINES_TOKEN")
 
 	versionWP, _ := os.LookupEnv("WP_API_VERSION")
@@ -552,7 +552,7 @@ func SendNotificationFromNewProducts(to, userName, kindName, forGender string) e
 		"to": "` + to + `",
 		"type": "template",
 		"template": {
-			"name": "nuevos_productos",
+			"name": "nuevos_productos_v2",
 			"language": {
 				"code": "es",
 			},
@@ -566,11 +566,7 @@ func SendNotificationFromNewProducts(to, userName, kindName, forGender string) e
 						},
 						{
 							"type": "text",
-							"text": "` + kindName + `",
-						},
-						{
-							"type": "text",
-							"text": "` + forGender + `",
+							"text": "` + msg + `",
 						},
 					]
 				}
