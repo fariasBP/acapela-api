@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -118,6 +119,8 @@ func VerifyTokenWp(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 		// oteniendo env
 		tkn2, _ := os.LookupEnv("WP_VERIFY_TOKEN")
+		fmt.Println(tkn)
+		fmt.Println(tkn2)
 
 		if tkn != tkn2 {
 			return c.JSON(400, config.SetRes(400, "Error: No tienes permiso"))
