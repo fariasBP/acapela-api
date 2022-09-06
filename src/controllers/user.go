@@ -208,3 +208,25 @@ func DeleteUserWp(c echo.Context) error {
 
 	return c.JSON(200, config.SetRes(200, "Se elimino al usuario y envio correctamente el mensaje"))
 }
+
+// ---- ACTUALIZAR USUARIO ----
+// ---- actualizando nombre de usuario ----
+func ChangeNameUserByPhone(c echo.Context) error {
+	// obteniendo variables
+	body := &models.User{}
+	d := c.Request().Body
+	_ = json.NewDecoder(d).Decode(body)
+	defer d.Close()
+	// verificar que no exista un code + phone iguales
+	existPhone := models.ExistsPhone(body.Phone)
+	if !existPhone {
+		return c.JSON(400, config.SetRes(400, "Error: El telefono no esta registrado."))
+	}
+	// cambiando nombre de usuario
+	err := models.UpdUserNameByPhone(body.Phone, body.Name)
+	if err != nil {
+		return c.JSON(500, config.SetResError(500, "Error: No se pudo actualizar el nombre", err.Error()))
+	}
+
+	return c.JSON(200, config.SetRes(200, "Se actulizo correctamente el usuario"))
+}

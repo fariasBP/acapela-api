@@ -2,12 +2,13 @@ package routes
 
 import (
 	"github.com/fariasBP/acapela-api/src/controllers"
+	"github.com/fariasBP/acapela-api/src/middlewares"
 	"github.com/labstack/echo/v4"
 )
 
 func WPRoute(e *echo.Echo) {
 
-	wp := e.Group("/wp")
+	wp := e.Group("/wp", middlewares.VerifyTokenWp)
 	wp.POST("/registration", controllers.RegistrationWp)
 	wp.POST("/code", controllers.SendCodeWp)
 	wp.POST("/linkfacebook", controllers.SendLinkFacebookWp)

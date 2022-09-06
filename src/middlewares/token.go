@@ -106,3 +106,24 @@ func IsBossOrAdminOrEmpl(next echo.HandlerFunc) echo.HandlerFunc {
 		return c.JSON(400, config.SetRes(400, "Error: El usuario no es AdminBoss o AdminEmploye o Employe."))
 	}
 }
+func VerifyTokenWp(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		// obteniedo el header access-token
+		var tkn string = ""
+		for name, values := range c.Request().Header {
+			if name == "Access-Token" {
+				tkn = string(values[0])
+				break
+			}
+		}
+		// oteniendo env
+		tkn2, _ := os.LookupEnv("WP_VERIFY_TOKEN")
+
+		if tkn != tkn2 {
+			return c.JSON(400, config.SetRes(400, "Error: No tienes permiso"))
+		}
+
+		// fin del middleware
+		return next(c)
+	}
+}
