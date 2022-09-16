@@ -27,7 +27,7 @@ func SendWelcomeMessage(to, userName string) error {
 		"to": "` + to + `",
 		"type": "template",
 		"template": {
-			"name": "mensaje_de_bienvenida_v2",
+			"name": "mensaje_de_bienvenida_v1",
 			"language": {
 				"code": "es",
 			},
@@ -166,7 +166,7 @@ func SendDefaultMessageNoCommand(to string) error {
 		"to": "` + to + `",
 		"type": "template",
 		"template": {
-			"name": "mensaje_por_defecto_v3",
+			"name": "mensaje_por_defecto_v1",
 			"language": {
 				"code": "es",
 			},
@@ -207,7 +207,7 @@ func SendCodeMessage(to, code string) error {
 		"to": "` + to + `",
 		"type": "template",
 		"template": {
-			"name": "verification_code",
+			"name": "codigo_de_verificacion_v1",
 			"language": {
 				"code": "es",
 			},
@@ -259,7 +259,7 @@ func SendDefaultMsgRegistration(to string) error {
 		"to": "` + to + `",
 		"type": "template",
 		"template": {
-			"name": "registrarse",
+			"name": "mensaje_registrador_v1",
 			"language": {
 				"code": "es",
 			},
@@ -300,7 +300,7 @@ func SendConfirmDeleteUser(to string) error {
 		"to": "` + to + `",
 		"type": "template",
 		"template": {
-			"name": "eliminar_usuario",
+			"name": "mensaje_de_confirmar_eliminar_usuario_v1",
 			"language": {
 				"code": "es",
 			},
@@ -341,7 +341,7 @@ func SendConfirmInactiveUser(to string) error {
 		"to": "` + to + `",
 		"type": "template",
 		"template": {
-			"name": "inactivar_usuario",
+			"name": "mensaje_de_inactivarse_v1",
 			"language": {
 				"code": "es",
 			},
@@ -382,7 +382,7 @@ func SendReactive(to string) error {
 		"to": "` + to + `",
 		"type": "template",
 		"template": {
-			"name": "reactivar_usuario",
+			"name": "mensaje_de_reactivarse_v1",
 			"language": {
 				"code": "es",
 			},
@@ -411,45 +411,45 @@ func SendReactive(to string) error {
 }
 
 // ---- preguntar para reactivar ----
-func SendDelUser(to string) error {
-	// obtener las variables de entorno
-	tokenMETA, _ := os.LookupEnv("META_BUSSINES_TOKEN")
+// func SendDelUser(to string) error {
+// 	// obtener las variables de entorno
+// 	tokenMETA, _ := os.LookupEnv("META_BUSSINES_TOKEN")
 
-	versionWP, _ := os.LookupEnv("WP_API_VERSION")
-	phoneIdWP, _ := os.LookupEnv("WP_PHONE_ID")
-	// estableciendo template
-	jsonStr := []byte(`{
-		"messaging_product": "whatsapp",
-		"to": "` + to + `",
-		"type": "template",
-		"template": {
-			"name": "eliminar_usuario",
-			"language": {
-				"code": "es",
-			},
-		}
-	}`)
-	// estableciendo parametros de consulta consulta a la api
-	req, err := http.NewRequest("POST", "https://graph.facebook.com/v"+versionWP+"/"+phoneIdWP+"/messages", bytes.NewBuffer(jsonStr))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+tokenMETA)
-	// realizando consulta
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	// verificando una respuesta correcta
-	if resp.StatusCode != 200 {
-		return err
-	}
+// 	versionWP, _ := os.LookupEnv("WP_API_VERSION")
+// 	phoneIdWP, _ := os.LookupEnv("WP_PHONE_ID")
+// 	// estableciendo template
+// 	jsonStr := []byte(`{
+// 		"messaging_product": "whatsapp",
+// 		"to": "` + to + `",
+// 		"type": "template",
+// 		"template": {
+// 			"name": "eliminar_usuario",
+// 			"language": {
+// 				"code": "es",
+// 			},
+// 		}
+// 	}`)
+// 	// estableciendo parametros de consulta consulta a la api
+// 	req, err := http.NewRequest("POST", "https://graph.facebook.com/v"+versionWP+"/"+phoneIdWP+"/messages", bytes.NewBuffer(jsonStr))
+// 	if err != nil {
+// 		return err
+// 	}
+// 	req.Header.Set("Content-Type", "application/json")
+// 	req.Header.Set("Authorization", "Bearer "+tokenMETA)
+// 	// realizando consulta
+// 	client := &http.Client{}
+// 	resp, err := client.Do(req)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defer resp.Body.Close()
+// 	// verificando una respuesta correcta
+// 	if resp.StatusCode != 200 {
+// 		return err
+// 	}
 
-	return err
-}
+// 	return err
+// }
 
 // ---- MAS OPCIONES ----
 // ---- mas opciones (pagina cero) ----
@@ -465,7 +465,7 @@ func SendMoreOpts(to string) error {
 		"to": "` + to + `",
 		"type": "template",
 		"template": {
-			"name": "mas_opciones_cero",
+			"name": "mensaje_de_mas_opciones_cero_v1",
 			"language": {
 				"code": "es",
 			},
@@ -506,7 +506,7 @@ func SendMoreOptsOne(to string) error {
 		"to": "` + to + `",
 		"type": "template",
 		"template": {
-			"name": "mas_opciones_uno",
+			"name": "mensaje_de_mas_opciones_uno_v1",
 			"language": {
 				"code": "es",
 			},
@@ -552,7 +552,7 @@ func SendNotificationFromNewProducts(to, userName, msg string) error {
 		"to": "` + to + `",
 		"type": "template",
 		"template": {
-			"name": "nuevos_productos_v2",
+			"name": "mensaje_de_nuevos_productos_por_name_y_msg_v1",
 			"language": {
 				"code": "es",
 			},
