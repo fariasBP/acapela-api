@@ -11,6 +11,7 @@ import (
 func IndexRoute(e *echo.Echo) {
 	fmt.Println("aqui")
 	e.GET("/", controllers.InfoWeb)
+	e.GET("/dataapp", controllers.DataApp)
 	mode := e.Group("/mode", middlewares.ValidateToken, middlewares.IsBoss)
 	mode.POST("/dev", controllers.ChangeModeDev)
 	mode.POST("/prod", controllers.ChangeModeProd)

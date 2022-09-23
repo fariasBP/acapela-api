@@ -17,6 +17,14 @@ type dat struct {
 	Msg     string `json:"msg"`
 }
 
+func DataApp(c echo.Context) error {
+	err, dat := models.GetDataApp()
+	if err != nil {
+		return c.JSON(500, config.SetResError(500, "No se puede obtener appData", err.Error()))
+	}
+	return c.JSON(200, config.SetResJson(200, "se obtuvo los datos", dat))
+}
+
 func InfoWeb(c echo.Context) error {
 	// struct de la informacion web
 	u := &dat{

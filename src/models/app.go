@@ -65,3 +65,15 @@ func UpdDevelopingApp(dev bool) error {
 
 	return err
 }
+
+func GetDataApp() (error, *App) {
+	// conectando a la BBDD
+	ctx, client, coll := config.ConnectColl("app")
+	defer fmt.Println("Disconnected DB")
+	defer client.Disconnect(ctx)
+	// obteniendo valores
+	dat := &App{}
+	err := coll.FindOne(ctx, bson.M{"name": "Acapela"}).Decode(dat)
+
+	return err, dat
+}
