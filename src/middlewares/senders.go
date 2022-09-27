@@ -597,11 +597,16 @@ func SendNotificationFromNewProducts(to, userName, msg string) error {
 
 // ---- PRODUCTOS ----
 // ---- enviar imagen del producto ----
-func SendImageByLink(to, linkImg string) error {
+func SendImageByLink(to, nameFileImg string) error {
 	tokenMETA, _ := os.LookupEnv("META_BUSSINES_TOKEN")
 
 	versionWP, _ := os.LookupEnv("WP_API_VERSION")
 	phoneIdWP, _ := os.LookupEnv("WP_PHONE_ID")
+
+	bucket, _ := os.LookupEnv("NAME_BUCKET_SPACE")
+	endpoint, _ := os.LookupEnv("ENDPOINT_ACAPELA_SPACE")
+
+	linkImg := "https://" + bucket + "." + endpoint + "/" + nameFileImg
 
 	jsonStr := []byte(`{
 		"messaging_product": "whatsapp",

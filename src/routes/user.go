@@ -12,6 +12,6 @@ func User(e *echo.Echo) {
 	// })
 	router := e.Group("user", middlewares.ValidateToken)
 	// router.POST("", controllers.GetUser)
-	router.POST("/user", controllers.GetAllUsers)
-	router.PUT("/user/name", controllers.ChangeNameUserByPhone, middlewares.IsBossOrAdmin, middlewares.NameUserValidate)
+	router.GET("/all", controllers.GetAllUsers)
+	router.PUT("/name", controllers.ChangeNameUserByPhone, middlewares.IsBossOrAdmin, middlewares.NameUserValidate)
 }
