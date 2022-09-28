@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/fariasBP/acapela-api/src/config"
 	"github.com/fariasBP/acapela-api/src/middlewares"
@@ -21,7 +22,7 @@ type (
 	}
 )
 
-func NotifyNewProducts(c echo.Context) error {
+func NotifyNewProductsWp(c echo.Context) error {
 	// obteniendo variables
 	body := &bodyNotifyMsg{}
 	d := c.Request().Body
@@ -36,10 +37,10 @@ func NotifyNewProducts(c echo.Context) error {
 	for _, v := range users {
 		err = middlewares.SendNotificationFromNewProducts(strconv.Itoa(v.Phone), v.Name, body.Msg)
 		if err != nil {
-			fmt.Println("Error: no se pudo enviar el mensaje de notificacion", err.Error())
+			fmt.Println("Error: no se pudo enviar el mensaje de notificacion a "+strconv.Itoa(v.Phone), err.Error())
 		}
+		time.Sleep(time.Millisecond * 500)
 	}
-
 	return c.JSON(200, config.SetRes(200, "in notify new products"))
 }
 

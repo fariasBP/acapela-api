@@ -197,6 +197,7 @@ func SendMoreOptOneWp(c echo.Context) error {
 	return c.JSON(200, config.SetRes(200, "Se envio correctamente el mensaje"))
 }
 
+// ENVIAR IMAGENES DE NUEVOS PRODUCTOS
 func SendImgsNewProductsWp(c echo.Context) error {
 	to := c.QueryParam("from")
 	fmt.Println(to)
@@ -216,10 +217,11 @@ func SendImgsNewProductsWp(c echo.Context) error {
 			// return c.JSON(500, config.SetResError(500, "Error: No se pudo enviar las fotos de los nuevos productos", err.Error()))
 			x++
 		}
+		time.Sleep(time.Millisecond * 500)
 	}
 	if x > 0 {
 		middlewares.SendAnyMessageText(to, ("Hubo un problema: " + strconv.Itoa(x) + " fotos no se pudieron enviar de los nuevos productos."))
-		return c.JSON(500, config.SetResError(500, "Error: No se pudo enviar algunas fotos de los nuevos productos", err.Error()))
+		return c.JSON(500, config.SetResError(500, "Error: No se pudo enviar  "+strconv.Itoa(x)+" fotos.", err.Error()))
 	}
 
 	return c.JSON(200, config.SetRes(200, "Se envio correctamente los nuevos productos"))
