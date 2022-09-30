@@ -552,7 +552,7 @@ func SendNotificationFromNewProducts(to, userName, msg string) error {
 		"to": "` + to + `",
 		"type": "template",
 		"template": {
-			"name": "mensaje_de_nuevos_productos_por_name_y_msg_v1",
+			"name": "mensaje_de_nuevos_productos_por_name_y_msg_v2",
 			"language": {
 				"code": "es",
 			},

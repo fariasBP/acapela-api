@@ -1,11 +1,11 @@
 package middlewares
 
 import (
-	"fmt"
 	"os"
 	"time"
 
 	"github.com/fariasBP/acapela-api/src/config"
+	"github.com/fariasBP/acapela-api/src/models"
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 )
@@ -72,6 +72,11 @@ func ValidateToken(next echo.HandlerFunc) echo.HandlerFunc {
 		if !token.Valid {
 			return c.JSON(400, config.SetResError(400, "token no autorizado", ""))
 		}
+		// verificando que el usuario existe
+		_, err = models.GetUserByIDStr(claims.Id)
+		if err != nil {
+			return c.JSON(400, config.SetResError(400, "Error: Id del token incorrecto", err.Error()))
+		}
 		// creando supervariables echo
 		c.Set("id", claims.Id)
 		c.Set("rol", claims.Rol)
@@ -119,8 +124,6 @@ func VerifyTokenWp(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 		// oteniendo env
 		tkn2, _ := os.LookupEnv("WP_VERIFY_TOKEN")
-		fmt.Println(tkn)
-		fmt.Println(tkn2)
 
 		if tkn != tkn2 {
 			return c.JSON(400, config.SetRes(400, "Error: No tienes permiso"))

@@ -17,6 +17,10 @@ type (
 	RolUser struct {
 		Rol string
 	}
+	UserProfile struct {
+		Id  string `json:"id"`
+		Rol string `json:"rol"`
+	}
 )
 
 // func GetUser(c echo.Context) error {
@@ -31,6 +35,18 @@ type (
 
 // 	return c.JSON(200, config.SetResJson(200, "user recived info", user))
 // }
+func GetProfile(c echo.Context) error {
+	id := c.Get("id").(string)
+	// rol := c.Get("rol").(string)
+
+	user, err := models.GetUserByIDStr(id)
+	if err != nil {
+		return c.JSON(400, config.SetResError(400, "Error: No se pudo obtener al usuario", err.Error()))
+	}
+
+	return c.JSON(200, config.SetResJson(200, "todo okay", user))
+}
+
 func GetAllUsers(c echo.Context) error {
 	users, err := models.GetUsers()
 	if err != nil {

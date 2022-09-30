@@ -14,4 +14,5 @@ func User(e *echo.Echo) {
 	// router.POST("", controllers.GetUser)
 	router.GET("/all", controllers.GetAllUsers)
 	router.PUT("/name", controllers.ChangeNameUserByPhone, middlewares.IsBossOrAdmin, middlewares.NameUserValidate)
+	router.GET("/profile", controllers.GetProfile)
 }
