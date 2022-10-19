@@ -17,8 +17,21 @@ func SendMessageToUser(c echo.Context) error {
 	_ = json.NewDecoder(d).Decode(body)
 	defer d.Close()
 
+	// obteniendo al usuario
+	id := c.Get("id").(string)
+	user, err := models.GetUserByIDStr(id)
+	if err != nil {
+		return c.JSON(400, config.SetResError(400, "Error: No se pudo obtener al usuario", err.Error()))
+	}
+
 	// enviando mensaje wp
-	err := middlewares.SendAnyMessageText(strconv.Itoa(body.To), body.Msg)
+	// err = middlewares.SendAnyMessageText(strconv.Itoa(body.To), body.Msg)
+	// if err != nil {
+	// 	return c.JSON(500, config.SetResError(500, "Error: No se pudo enviar el mensaje a whatsapp.", err.Error()))
+	// }
+
+	// enviando respuesta msg wp
+	err = middlewares.SendResponseMessage(strconv.Itoa(body.To), user.Name, body.Msg, strconv.Itoa(user.Phone))
 	if err != nil {
 		return c.JSON(500, config.SetResError(500, "Error: No se pudo enviar el mensaje a whatsapp.", err.Error()))
 	}

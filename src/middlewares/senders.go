@@ -166,10 +166,71 @@ func SendDefaultMessageNoCommand(to string) error {
 		"to": "` + to + `",
 		"type": "template",
 		"template": {
-			"name": "mensaje_por_defecto_v1",
+			"name": "mensaje_por_defecto_v2",
 			"language": {
 				"code": "es",
 			},
+		}
+	}`)
+
+	req, err := http.NewRequest("POST", "https://graph.facebook.com/v"+versionWP+"/"+phoneIdWP+"/messages", bytes.NewBuffer(jsonStr))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+tokenMETA)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return err
+	}
+
+	return err
+}
+
+// ---- mensaje de respuesta ----
+func SendResponseMessage(to, name, msg, phone string) error {
+	// obtener las variables de entorno
+	tokenMETA, _ := os.LookupEnv("META_BUSSINES_TOKEN")
+
+	versionWP, _ := os.LookupEnv("WP_API_VERSION")
+	phoneIdWP, _ := os.LookupEnv("WP_PHONE_ID")
+
+	// estructura del mensaje
+	jsonStr := []byte(`{
+		"messaging_product": "whatsapp",
+		"to": "` + to + `",
+		"type": "template",
+		"template": {
+			"name": "mensaje_respuesta_v1",
+			"language": {
+				"code": "es",
+			},
+			"components" : [
+				{
+					"type": "body",
+					"parameters": [
+						{
+							"type": "text",
+							"text": "` + name + `",
+						},
+						{
+							"type": "text",
+							"text": "` + msg + `",
+						},
+						{
+							"type": "text",
+							"text": "` + phone + `",
+						}
+					]
+				}
+			]
 		}
 	}`)
 
