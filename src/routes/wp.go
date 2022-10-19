@@ -9,7 +9,7 @@ func WPRoute(e *echo.Echo) {
 
 	wp := e.Group("/wp")
 	wp.POST("/registration", controllers.RegistrationWp)
-	wp.POST("/code", controllers.SendCodeWp)
+	wp.POST("/code", controllers.SendCodeWpAndEmail)
 	wp.POST("/linkfacebook", controllers.SendLinkFacebookWp)
 	wp.POST("/default", controllers.SendDefaultMessageWp)
 	wp.POST("/moreopt", controllers.SendMoreOptWp)

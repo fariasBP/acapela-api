@@ -44,6 +44,7 @@ func main() {
 	routes.Notification(e)
 	routes.WPRoute(e)
 	routes.Files(e)
+	routes.MessagesRoute(e)
 	// iniciando server
 	err := godotenv.Load()
 	if err == nil {

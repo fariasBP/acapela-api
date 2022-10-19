@@ -14,7 +14,7 @@ import (
 )
 
 // ---- enviar codigo ----
-func SendCodeWp(c echo.Context) error {
+func SendCodeWpAndEmail(c echo.Context) error {
 	// obteniendo variables
 	body := &models.User{}
 	d := c.Request().Body
@@ -40,6 +40,14 @@ func SendCodeWp(c echo.Context) error {
 			middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se pudo generar el codigo")
 			return c.JSON(500, config.SetResError(500, "Error: al insertar codigo a BBDD", err.Error()))
 		}
+		// enviar mensaje del codigo por email
+		if user.Email != "" {
+			// err := middlewares.SendEmailCodeTemplate(user.Name, user.Email, "assets/templates/emailTemplate.html", cod)
+			err := middlewares.SendEmailBody(user.Name, user.Email, "Hola "+user.Name+". Tu codigo es: "+cod)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
 		// enviar mensaje del codigo por whatsapp
 		err = middlewares.SendCodeMessage(strconv.Itoa(body.Phone), cod)
 		if err != nil {
@@ -49,6 +57,10 @@ func SendCodeWp(c echo.Context) error {
 		return c.JSON(200, config.SetRes(200, "Codigo creado"))
 	}
 	middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se puede enviar el código por que ya ha solicitado uno, espere 1 hora para solicitar otro código.")
+	err = middlewares.SendEmailBody(user.Name, user.Email, "Hola "+user.Name+". Tu no puedes recibir otro codigo por que ya has solicitado uno")
+	if err != nil {
+		fmt.Println(err)
+	}
 	return c.JSON(400, config.SetRes(400, "Error: No se puede enviar el codigo por que ya se ha solicitado uno"))
 }
 
@@ -90,6 +102,11 @@ func SendDefaultMessageWp(c echo.Context) error {
 	} else if err != nil {
 		middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "Hubo un problema intentalo de nuevo.")
 		return c.JSON(500, config.SetResError(500, "Error: no se pudo terminar la consulta", err.Error()))
+	}
+	// creando el mensaje
+	err = models.CreateMsgFromUserToApp(body.Phone, body.Name)
+	if err != nil {
+		return c.JSON(500, config.SetResError(500, "Error: No se guardo el mensaje.", err.Error()))
 	}
 	// enviando mensaje default
 	err = middlewares.SendDefaultMessageNoCommand(strconv.Itoa(body.Phone))

@@ -3,8 +3,10 @@ package controllers
 import (
 	"fmt"
 	"io"
+	urlNet "net/url"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/fariasBP/acapela-api/src/config"
 	"github.com/fariasBP/acapela-api/src/middlewares"
@@ -53,6 +55,10 @@ func UploadImageToCloudinary(c echo.Context) error {
 	if err != nil {
 		return c.JSON(500, config.SetResError(500, "no se pudo enviar la imagen a cloudinary", err.Error()))
 	}
+	u, _ := urlNet.Parse(url.URL)
+	fmt.Println(u.Path)
+	sm := strings.Split(u.Path, "/")
+	fmt.Println(sm[len(sm)-3], sm[len(sm)-2], sm[len(sm)-1])
 
 	// return c.JSON(200, config.SetRes(200, url))
 	return c.JSON(200, config.SetResJson(200, "Se subio imagen a Cloudinary correctamente.", map[string]string{

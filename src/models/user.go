@@ -29,16 +29,19 @@ type (
 		ID                 primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 		Name               string             `json:"name" bson:"name,omitempty"`
 		Lastname           string             `json:"lastname" bson:"lastname,omitempty"`
+		Photo              string             `json:"photo" bson:"photo,omitempty"`
 		Email              string             `json:"email" bson:"email,omitempty"`
 		Code               string             `json:"code" bson:"code,omitempty"`
 		Rol                int                `json:"rol" bson:"rol,omitempty"`
 		Phone              int                `json:"phone" bson:"phone"`
 		Sleep              uint8              `json:"sleep" bson:"sleep"`
-		CreateDate         time.Time          `json:"create_date" bson:"create_date,omitempty"`
-		UpdateDate         time.Time          `json:"update_date" bson:"update_date,omitempty"`
 		CodeDate           time.Time          `json:"code_date" bson:"code_date,omitempty"`
 		SleepDate          time.Time          `json:"sleep_date" bson:"sleep_date,omitempty"`
 		WpRegistrationDate time.Time          `json:"wp_registration_date" bson:"wp_registration_date,omitempty"`
+		Mailbox            string             `json:"mailbox" bson:"mailbox,omitempty"`
+		CountMailbox       int                `json:"count_mailbox" bson:"count_mailbox,omitempty"`
+		CreateDate         time.Time          `json:"create_date" bson:"create_date,omitempty"`
+		UpdateDate         time.Time          `json:"update_date" bson:"update_date,omitempty"`
 	}
 )
 
