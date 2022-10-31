@@ -6,7 +6,6 @@ import (
 )
 
 func WPRoute(e *echo.Echo) {
-
 	wp := e.Group("/wp")
 	wp.POST("/registration", controllers.RegistrationWp)
 	wp.POST("/code", controllers.SendCodeWpAndEmail)
@@ -21,6 +20,9 @@ func WPRoute(e *echo.Echo) {
 	wp.POST("/deleteuser", controllers.SendConfirmDeleteWp)
 	wp.POST("/confirmdeleteuser", controllers.DeleteUserWp)
 	wp.GET("/newproducts", controllers.SendImgsNewProductsWp)
+	swp := e.Group("/swp")
+	swp.POST("/desactivinguser", controllers.DesactivingUserSwp)
+	swp.POST("/activinguser", controllers.ActivingUserSwp)
 	// mass := wp.Group("/mass", middlewares.IsBoss)
 	// mass.POST("/newproducts", controllers.SendMassMessagesFromNewProducts)
 }

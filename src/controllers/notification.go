@@ -18,7 +18,8 @@ type (
 		Gender string `json:"gender"`
 	}
 	bodyNotifyMsg struct {
-		Msg string `json:"msg"`
+		Msg       string `json:"msg"`
+		NotReaded int    `json:"not_readed"`
 	}
 )
 
@@ -29,19 +30,20 @@ func NotifyNewProductsWp(c echo.Context) error {
 	_ = json.NewDecoder(d).Decode(body)
 	defer d.Close()
 	// obteniendo usuarios
-	users, err := models.GetPhoneAndNameForNotificationsFromClients()
+	users, err := models.GetPhoneAndNameForNotificationsFromClientsByNotReaded(body.NotReaded)
 	if err != nil {
 		return c.JSON(500, config.SetResError(500, "Error: No se pudo obtener a los usuarios, para enviar la notificacion de nuevos productos", err.Error()))
 	}
 	// Enviando el mensaje
 	for _, v := range users {
+		print("mensaje para " + v.Name)
 		err = middlewares.SendNotificationFromNewProducts(strconv.Itoa(v.Phone), v.Name, body.Msg)
 		if err != nil {
 			fmt.Println("Error: no se pudo enviar el mensaje de notificacion a "+strconv.Itoa(v.Phone), err.Error())
 		}
 		time.Sleep(time.Millisecond * 500)
 	}
-	return c.JSON(200, config.SetRes(200, "in notify new products"))
+	return c.JSON(200, config.SetRes(200, "se envio los mensajes"))
 }
 
 // func SendOneNotification(c echo.Context) error {

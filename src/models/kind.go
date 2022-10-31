@@ -2,7 +2,6 @@ package models
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/fariasBP/acapela-api/src/config"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -11,7 +10,7 @@ import (
 )
 
 type ProductKind struct {
-	ID   primitive.ObjectID `bson:"_id,omitempty"`
+	ID   primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 	Name string             `json:"name" bson:"name,omitempty"`
 }
 
@@ -21,7 +20,6 @@ func NewProductKind(name string) error {
 	}
 
 	ctx, client, coll := config.ConnectColl("kinds")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 
 	_, err := coll.InsertOne(context.Background(), newModel)
@@ -29,7 +27,6 @@ func NewProductKind(name string) error {
 }
 func ExistsNameProductKind(name string) (b bool) {
 	ctx, client, coll := config.ConnectColl("kinds")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 
 	kindProd := &ProductKind{}
@@ -44,7 +41,6 @@ func ExistsNameProductKind(name string) (b bool) {
 func GetAllKinds() ([]ProductKind, error) {
 	// conectado a BBDD
 	ctx, client, coll := config.ConnectColl("kinds")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 	// consultando
 	cursor, err := coll.Find(ctx, bson.M{})
@@ -62,7 +58,6 @@ func GetAllKinds() ([]ProductKind, error) {
 func UpdateNameKind(id primitive.ObjectID, name string) error {
 	// conectado a BBDD
 	ctx, client, coll := config.ConnectColl("kinds")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 	// actualizando
 	update := bson.M{"$set": bson.M{"name": name}}
@@ -73,7 +68,6 @@ func UpdateNameKind(id primitive.ObjectID, name string) error {
 func DeleteKindById(id primitive.ObjectID) error {
 	// conectado a BBDD
 	ctx, client, coll := config.ConnectColl("kinds")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 	// eliminando de la BBDD
 	_, err := coll.DeleteOne(ctx, bson.M{"_id": id})
@@ -82,7 +76,6 @@ func DeleteKindById(id primitive.ObjectID) error {
 }
 func ExistKindId(id primitive.ObjectID) bool {
 	ctx, client, coll := config.ConnectColl("kinds")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 	// consultando
 	kindModel := &ProductKind{}
@@ -92,7 +85,6 @@ func ExistKindId(id primitive.ObjectID) bool {
 }
 func ExistKindIdString(id string) bool {
 	ctx, client, coll := config.ConnectColl("kinds")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 	// verificando si id es correcto
 	ObjId, err := primitive.ObjectIDFromHex(id)

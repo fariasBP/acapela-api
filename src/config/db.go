@@ -2,7 +2,6 @@ package config
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 
@@ -23,7 +22,6 @@ func Connect() (context.Context, *mongo.Client) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Connected DB")
 	return ctx, client
 }
 func ConnectDB() (context.Context, *mongo.Client, *mongo.Database) {

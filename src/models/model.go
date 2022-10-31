@@ -2,7 +2,6 @@ package models
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/fariasBP/acapela-api/src/config"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -10,7 +9,7 @@ import (
 )
 
 type ProductModel struct {
-	ID   primitive.ObjectID `bson:"_id,omitempty"`
+	ID   primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 	Name string             `json:"name" bson:"name,omitempty"`
 	Kind string             `json:"kind" bson:"kind,omitempty"`
 }
@@ -22,7 +21,6 @@ func NewProductModel(name string, idKind string) error {
 	}
 	// conectando a la BBDD
 	ctx, client, coll := config.ConnectColl("models")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 	// insertando en la BBDD
 	_, err := coll.InsertOne(context.Background(), newModel)
@@ -30,7 +28,6 @@ func NewProductModel(name string, idKind string) error {
 }
 func ExistsNameProductModel(name string) (b bool) {
 	ctx, client, coll := config.ConnectColl("models")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 
 	productModel := &ProductModel{}
@@ -43,7 +40,6 @@ func ExistsNameProductModel(name string) (b bool) {
 }
 func GetAllModels() ([]ProductModel, error) {
 	ctx, client, coll := config.ConnectColl("models")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 
 	cursor, err := coll.Find(ctx, bson.M{})
@@ -60,7 +56,6 @@ func GetAllModels() ([]ProductModel, error) {
 }
 func ExistsModelId(id primitive.ObjectID) bool {
 	ctx, client, coll := config.ConnectColl("models")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 
 	model := &ProductModel{}
@@ -70,7 +65,6 @@ func ExistsModelId(id primitive.ObjectID) bool {
 }
 func ExistsModelIdString(id string) bool {
 	ctx, client, coll := config.ConnectColl("models")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 
 	ObjId, err := primitive.ObjectIDFromHex(id)
@@ -86,7 +80,6 @@ func ExistsModelIdString(id string) bool {
 func UpdateModelById(id primitive.ObjectID, name, idKind string) error {
 	// conectando a la BBDD
 	ctx, client, coll := config.ConnectColl("models")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 
 	update := bson.M{"$set": bson.M{"name": name, "kind": idKind}}
@@ -97,7 +90,6 @@ func UpdateModelById(id primitive.ObjectID, name, idKind string) error {
 func DeleteModelById(id primitive.ObjectID) error {
 	// conectando a la BBDD
 	ctx, client, coll := config.ConnectColl("models")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 
 	_, err := coll.DeleteOne(ctx, bson.M{"_id": id})

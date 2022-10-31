@@ -79,7 +79,6 @@ func NewProduct(price, priceMin int, photos []string, kind string, models []stri
 	ctx, client, db := config.ConnectDB()
 	collProducts := db.Collection("products")
 	collApp := db.Collection("app")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 
 	appName, _ := os.LookupEnv("APP_NAME")
@@ -95,7 +94,6 @@ func NewProduct(price, priceMin int, photos []string, kind string, models []stri
 }
 func GetAllProducts() ([]Product, error) {
 	ctx, client, coll := config.ConnectColl("products")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 
 	cursor, err := coll.Find(ctx, bson.M{})
@@ -115,7 +113,6 @@ func GetAllProducts() ([]Product, error) {
 func GetProducts(limit int, page int) ([]Product, error) {
 	// conectando a la base de datos
 	ctx, client, coll := config.ConnectColl("products")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 	// obteniendo los ultimos abrigos
 	opts := options.Find().SetSort(bson.M{"create_date": -1}).SetLimit(int64(limit)).SetSkip(int64(page))
@@ -135,7 +132,6 @@ func GetProducts(limit int, page int) ([]Product, error) {
 
 func SellProductWithoutBuyer(id primitive.ObjectID, sellprice int, seller string) error {
 	ctx, client, coll := config.ConnectColl("products")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 	// realizando consulta
 	update := bson.M{"$set": bson.M{"sellprice": sellprice, "seller": seller}}
@@ -145,7 +141,6 @@ func SellProductWithoutBuyer(id primitive.ObjectID, sellprice int, seller string
 }
 func SellProductWithBuyer(id primitive.ObjectID, sellprice int, seller, buyer string) error {
 	ctx, client, coll := config.ConnectColl("products")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 	// realizando consulta
 	update := bson.M{"$set": bson.M{"sellprice": sellprice, "seller": seller, "buyer": buyer}}
@@ -158,7 +153,6 @@ func GetNewProducts() ([]Product, error) {
 	ctx, client, db := config.ConnectDB()
 	collProducts := db.Collection("products")
 	collApp := db.Collection("app")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 
 	appName, _ := os.LookupEnv("APP_NAME")
@@ -206,7 +200,6 @@ func ExistProductId(id primitive.ObjectID) bool {
 	fmt.Println("aqui")
 	fmt.Println(id)
 	ctx, client, coll := config.ConnectColl("products")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 	// consultando
 	productModel := &ProductModel{}
@@ -221,7 +214,6 @@ func NewCreated() error {
 	}
 
 	ctx, client, coll := config.ConnectColl("created")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 
 	_, err := coll.InsertOne(context.Background(), newCreated)
@@ -230,7 +222,6 @@ func NewCreated() error {
 
 func GetLastDateFromCreated() (int, time.Month, int, error) {
 	ctx, client, coll := config.ConnectColl("created")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 	// consultando (obteniendo el ultimo last created)
 	opts := options.Find().SetSort(bson.M{"last_created": -1}).SetLimit(1)
@@ -253,7 +244,6 @@ func GetLastDateFromCreated() (int, time.Month, int, error) {
 func GetLastDateFromProduct() (int, time.Month, int, error) {
 	// conectando con BBDD
 	ctx, client, coll := config.ConnectColl("products")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 	// consultando
 	opts := options.Find().SetSort(bson.M{"create_date": -1}).SetLimit(1)
@@ -274,7 +264,6 @@ func GetLastDateFromProduct() (int, time.Month, int, error) {
 func IsEqualLastDateCreated() bool {
 
 	ctx, client, coll := config.ConnectColl("created")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 	// consultando (obteniendo el ultimo last created)
 	opts := options.Find().SetSort(bson.M{"last_created": -1}).SetLimit(1)
@@ -292,7 +281,6 @@ func IsEqualLastDateCreated() bool {
 	}
 
 	ctx, client, coll = config.ConnectColl("products")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 
 	opts = options.Find().SetSort(bson.M{"create_date": -1}).SetLimit(1)
