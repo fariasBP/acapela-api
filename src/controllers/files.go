@@ -51,19 +51,24 @@ func UploadImageToCloudinary(c echo.Context) error {
 	}
 
 	// enviar a cloudinary
-	url, err := middlewares.SendImageInCloudinary(file)
+	res, err := middlewares.SendImageInCloudinary(file)
 	if err != nil {
 		return c.JSON(500, config.SetResError(500, "no se pudo enviar la imagen a cloudinary", err.Error()))
 	}
-	u, _ := urlNet.Parse(url.URL)
+
+	fmt.Println("res:")
+	fmt.Println(res)
+	fmt.Println("URL: " + res.URL)
+
+	u, _ := urlNet.Parse(res.URL)
 	fmt.Println(u.Path)
 	sm := strings.Split(u.Path, "/")
 	fmt.Println(sm[len(sm)-3], sm[len(sm)-2], sm[len(sm)-1])
 
 	// return c.JSON(200, config.SetRes(200, url))
 	return c.JSON(200, config.SetResJson(200, "Se subio imagen a Cloudinary correctamente.", map[string]string{
-		"url": url.URL,
-		"id":  url.PublicID,
+		"url": res.URL,
+		"id":  res.PublicID,
 	}))
 }
 

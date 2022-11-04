@@ -226,7 +226,7 @@ func SendResponseMessage(to, name, msg, phone string) error {
 						},
 						{
 							"type": "text",
-							"text": "` + phone + `",
+							"text": "+` + phone + `",
 						}
 					]
 				}
