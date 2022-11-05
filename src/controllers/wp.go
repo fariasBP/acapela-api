@@ -228,7 +228,7 @@ func SendImgsNewProductsWp(c echo.Context) error {
 	var x int = 0
 
 	for _, v := range products {
-		err = middlewares.SendImageByLink(to, v.Photos[0])
+		err = middlewares.SendImageByLink(to, "https://res.cloudinary.com/dsrygwi64/image/upload/"+"q_50/"+v.Photos[0]+".jpg")
 		if err != nil {
 			// middlewares.SendAnyMessageText(to, "No se pudo enviar las fotos de los nuevos productos")
 			// return c.JSON(500, config.SetResError(500, "Error: No se pudo enviar las fotos de los nuevos productos", err.Error()))
