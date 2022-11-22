@@ -179,11 +179,11 @@ func GetNewProducts() ([]Product, error) {
 	if err = cursor.All(ctx, &products); err != nil {
 		return nil, err
 	}
-	if len(products) > 3 {
+	if len(products) > 11 { // si los ultimos productos son mas de 11 entonces se envia caso contrario no.
 		return products, nil
 	}
-	// enviando los 30 ultimos productos (-1 = descendente)
-	opts := options.Find().SetSort(bson.M{"create_date": -1}).SetLimit(30).SetSkip(0)
+	// enviando los 20 ultimos productos (-1 = descendente)
+	opts := options.Find().SetSort(bson.M{"create_date": -1}).SetLimit(20).SetSkip(0)
 	cursor, err = collProducts.Find(ctx, bson.M{}, opts)
 	if err != nil {
 		return nil, err
