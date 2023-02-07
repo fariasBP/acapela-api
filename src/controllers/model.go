@@ -15,20 +15,29 @@ func CreateModel(c echo.Context) error {
 	d := c.Request().Body
 	_ = json.NewDecoder(d).Decode(body)
 	defer d.Close()
-	// verificando si exsite en la BBDD
-	exist := models.ExistsNameProductModel(strings.TrimSpace(body.Name))
-	if exist {
-		return c.JSON(400, config.SetResError(400, "Error: name productModel is already created.", ""))
-	}
-	exist = models.ExistKindIdString(body.Kind)
+	// obteniendo shop id
+	idShop := c.Get("shop").(string)
+	// // verificando si exsite un nombre similar
+	// exist := models.ExistsNameProductModel(strings.TrimSpace(body.Name))
+	// if exist {
+	// 	return c.JSON(400, config.SetResError(400, "Error: name productModel is already created.", ""))
+	// }
+	//existe Kind Id
+	exist := models.ExistKindIdString(body.Kind)
 	if !exist {
 		return c.JSON(400, config.SetResError(400, "Error: id Kind does not exist.", ""))
 	}
 	// creando nuevo modelo en la BBDD
-	err := models.NewProductModel(strings.TrimSpace(body.Name), body.Kind)
+	err := models.NewProductModel(strings.TrimSpace(body.Name), idShop, body.Kind)
 	if err != nil {
 		return c.JSON(500, config.SetResError(500, "error: not created new product model", err.Error()))
 	}
+	// creando suscripcion en kind
+	err = models.AddKindSuscription(body.Kind)
+	if err != nil {
+		return c.JSON(500, config.SetResError(500, "error: Nor se agrego la suscripcion a kind", err.Error()))
+	}
+
 	return c.JSON(200, config.SetRes(200, "product model created"))
 }
 func GetAllModels(c echo.Context) error {

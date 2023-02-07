@@ -1,7 +1,6 @@
 package models
 
 import (
-	"strings"
 	"time"
 
 	"github.com/fariasBP/acapela-api/src/config"
@@ -14,7 +13,7 @@ func UpdUserNameByPhone(phone int, name string) error {
 	ctx, client, coll := config.ConnectColl("users")
 	defer client.Disconnect(ctx)
 	// consultando
-	update := bson.M{"$set": bson.M{"name": strings.ToLower(strings.TrimSpace(name)), "wp_registration": false}}
+	update := bson.M{"$set": bson.M{"name": name, "wp_registration": false}}
 	_, err := coll.UpdateOne(ctx, bson.M{"phone": phone}, update)
 
 	return err
@@ -67,7 +66,7 @@ func UpdNotReadedUserByPhone(phone int) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	// consultando
+	// consultando Actualizando
 	update := bson.M{
 		"$set": bson.M{
 			"not_readed": user.NotReaded + 1,

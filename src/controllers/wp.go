@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"strconv"
 	"time"
 
@@ -45,7 +46,7 @@ func SendCodeWpAndEmail(c echo.Context) error {
 			// err := middlewares.SendEmailCodeTemplate(user.Name, user.Email, "assets/templates/emailTemplate.html", cod)
 			err := middlewares.SendEmailBody(user.Name, user.Email, "Hola "+user.Name+". Tu codigo es: "+cod)
 			if err != nil {
-				fmt.Println(err)
+				log.Printf("No se envio el correo electronio con el codigo por el siguiente motivo: %s\n", err)
 			}
 		}
 		// enviar mensaje del codigo por whatsapp
@@ -59,7 +60,7 @@ func SendCodeWpAndEmail(c echo.Context) error {
 	middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se puede enviar el código por que ya ha solicitado uno, espere 1 hora para solicitar otro código.")
 	err = middlewares.SendEmailBody(user.Name, user.Email, "Hola "+user.Name+". Tu no puedes recibir otro codigo por que ya has solicitado uno")
 	if err != nil {
-		fmt.Println(err)
+		log.Printf("No se envio el correo electronio con el codigo por el siguiente motivo: %s\n", err)
 	}
 	return c.JSON(400, config.SetRes(400, "Error: No se puede enviar el codigo por que ya se ha solicitado uno"))
 }

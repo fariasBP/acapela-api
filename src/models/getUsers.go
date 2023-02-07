@@ -30,7 +30,7 @@ func GetUsers() ([]User, error) {
 }
 
 // ---- obtener numero y nombre para notificaciones ----
-func GetPhoneAndNameForNotificationsFromClientsByNotReaded(notReaded int) ([]User, error) {
+func GetPhoneAndNameUsersByNotReaded(sendNotReaded bool) ([]User, error) {
 	// Conectando a la BBDD
 	ctx, client, coll := config.ConnectColl("users")
 	defer client.Disconnect(ctx)
@@ -39,7 +39,7 @@ func GetPhoneAndNameForNotificationsFromClientsByNotReaded(notReaded int) ([]Use
 	/*Si el valor de notReaded es 0 entonces no importa si el mensaje
 	no ha sido entregado o leido, */
 	var filter bson.M
-	if notReaded == 0 {
+	if sendNotReaded {
 		filter = bson.M{"$and": []bson.M{
 			bson.M{"sleep": 0},
 			bson.M{"rol": 4},
@@ -48,7 +48,7 @@ func GetPhoneAndNameForNotificationsFromClientsByNotReaded(notReaded int) ([]Use
 		filter = bson.M{"$and": []bson.M{
 			bson.M{"sleep": 0},
 			bson.M{"rol": 4},
-			bson.M{"not_readed": bson.M{"$gte": notReaded}},
+			bson.M{"not_readed": 0},
 		}}
 	}
 

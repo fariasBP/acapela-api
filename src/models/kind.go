@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"time"
 
 	"github.com/fariasBP/acapela-api/src/config"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -9,14 +10,32 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+/*
+ID: id que da por defecto mongodb
+Name: nombre de la prenda
+Creator: id (string) de la tienda creadora
+Verification: si la tienda se encuentra verificada es decir sí es oficial(default false)
+Status: estado de la ProductKind (aun no especificado)
+CreateDate: fecha de la creacion
+UpdateDate: fecha de la ultima actualización
+*/
 type ProductKind struct {
-	ID   primitive.ObjectID `json:"id" bson:"_id,omitempty"`
-	Name string             `json:"name" bson:"name,omitempty"`
+	ID           primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+	Name         string             `json:"name" bson:"name,omitempty"`
+	Creator      string             `json:"creator" bson:"creator,omitempty"`
+	Verification bool               `json:"verification" bson:"verification,omitempty"`
+	Status       int                `json:"status" bson:"status,omitempty"`
+	Suscriptions int                `json:"suscriptions" bson:"suscriptions,omitempty"`
+	CreateDate   time.Time          `json:"create_date" bson:"create_date,omitempty"`
+	UpdateDate   time.Time          `json:"update_date" bson:"update_date,omitempty"`
 }
 
-func NewProductKind(name string) error {
+func NewProductKind(name, creator string) error {
 	newModel := &ProductKind{
-		Name: name,
+		Name:       name,
+		Creator:    creator,
+		CreateDate: time.Now(),
+		UpdateDate: time.Now(),
 	}
 
 	ctx, client, coll := config.ConnectColl("kinds")
@@ -25,6 +44,8 @@ func NewProductKind(name string) error {
 	_, err := coll.InsertOne(context.Background(), newModel)
 	return err
 }
+
+// verifica si existe el nombre del kind (true = existe)
 func ExistsNameProductKind(name string) (b bool) {
 	ctx, client, coll := config.ConnectColl("kinds")
 	defer client.Disconnect(ctx)
@@ -96,4 +117,24 @@ func ExistKindIdString(id string) bool {
 	err = coll.FindOne(ctx, bson.M{"_id": ObjId}, options.FindOne().SetProjection(bson.M{"name": 0})).Decode(kindModel)
 
 	return err == nil
+}
+
+// incrementar suscripcion
+func AddKindSuscription(idKind string) error {
+	ctx, client, coll := config.ConnectColl("kinds")
+	defer client.Disconnect(ctx)
+	//convirtiendo a ObjectId
+	id, err := primitive.ObjectIDFromHex(idKind)
+	if err != nil {
+		return err
+	}
+	// actulizando (incrementando)
+	update := bson.M{
+		"$inc": bson.M{
+			"suscriptions": 1,
+		},
+	}
+	_, err = coll.UpdateOne(ctx, bson.M{"_id": id}, update)
+
+	return err
 }

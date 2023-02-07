@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/fariasBP/acapela-api/src/config"
@@ -11,8 +12,7 @@ import (
 )
 
 type JwtCustomClaims struct {
-	Id  string `json:"id"`
-	Rol uint8  `json:"rol"`
+	Id string `json:"id"`
 	jwt.StandardClaims
 }
 
@@ -23,11 +23,21 @@ func CreateToken(id string, rol uint8) (string, time.Time, error) {
 		secretVal = "secreto"
 	}
 
-	expiresJWT := time.Now().Add(2 * 24 * time.Hour)
+	// obteniendo la duracion del token y convirtiendo
+	durationTknAuth, defined := os.LookupEnv("TOKEN_AUTH_DURATION")
+	if !defined {
+		durationTknAuth = "30"
+	}
+	durationTknAuthInt, err := strconv.Atoi(durationTknAuth)
+	if err != nil {
+		durationTknAuthInt = 30
+	}
+
+	// creando el token
+	expiresJWT := time.Now().Add(time.Duration(durationTknAuthInt) * 24 * time.Hour)
 	secret := []byte(secretVal)
 	claims := &JwtCustomClaims{
 		id,
-		rol,
 		jwt.StandardClaims{
 			ExpiresAt: expiresJWT.Unix(),
 		},
@@ -41,16 +51,15 @@ func ValidateToken(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// obteniedo el header access-token
 		var tkn string = ""
+		var shop string = ""
 		for name, values := range c.Request().Header {
 			if name == "Access-Token" {
 				tkn = string(values[0])
-				break
+			}
+			if name == "Shop-Id" {
+				shop = string(values[0])
 			}
 		}
-		// if tkn == "" {
-		// 	return c.String(400, "error: token not provided")
-		// }
-		// fmt.Println("itrisdfL", tkn)
 
 		// obteniendo secret de variable de entorno
 		secretVal, defined := os.LookupEnv("SECRET_JWT")
@@ -77,16 +86,29 @@ func ValidateToken(next echo.HandlerFunc) echo.HandlerFunc {
 		if err != nil {
 			return c.JSON(400, config.SetResError(400, "Error: Id del token incorrecto", err.Error()))
 		}
-		// creando supervariables echo
+		// creando supervariables echo (guardando id de usuario y tienda)
 		c.Set("id", claims.Id)
-		c.Set("rol", claims.Rol)
+		c.Set("shop", shop)
 		// fin del middleware
 		return next(c)
 	}
 }
 
+// verificar si es dueño de la tienda
+func IsOwnerShop(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		id, idShop := c.Get("id").(string), c.Get("shop").(string)
+
+		if b := models.VerifyOwnerShop(id, idShop); b {
+			return next(c)
+		}
+		return c.JSON(400, config.SetResError(400, "Error: Usted no es Owner.", "user id or store id are not related"))
+	}
+}
+
 func IsBoss(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+
 		rol := c.Get("rol").(uint8)
 		if rol == 1 {
 			return next(c)

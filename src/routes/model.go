@@ -10,7 +10,7 @@ func ModelRoute(e *echo.Echo) {
 	e.GET("models/all", controllers.GetAllModels)
 	router := e.Group("/models", middlewares.ValidateToken)
 	router.POST("/create", controllers.CreateModel,
-		middlewares.IsBossOrAdmin, middlewares.ModelValidate)
+		middlewares.ModelValidate)
 	router.PUT("/update", controllers.UpdateModel,
 		middlewares.IsBossOrAdmin, middlewares.ModelUpdateValidate)
 	router.DELETE("/delete", controllers.DeleteModel,

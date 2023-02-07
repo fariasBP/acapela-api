@@ -9,20 +9,25 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// creando tipo de prenda
 func CreateKind(c echo.Context) error {
 	// obteniendo variables
 	body := &models.ProductKind{}
 	d := c.Request().Body
 	_ = json.NewDecoder(d).Decode(body)
 	defer d.Close()
-	// verificar que no existe un kind con el mismo nombre
-	exist := models.ExistsNameProductKind(strings.TrimSpace(body.Name))
-	if exist {
-		return c.JSON(400, config.SetResError(400, "Error: Ya existe un KindProduct con el mismo nombre", "same values kindproduct name"))
-	}
+
+	// obteniendo shop id
+	idShop := c.Get("shop").(string)
+
+	// // verificar que no existe un kind con el mismo nombre
+	// exist := models.ExistsNameProductKind(strings.TrimSpace(body.Name))
+	// if exist {
+	// 	return c.JSON(400, config.SetResError(400, "Error: Ya existe un KindProduct con el mismo nombre", "same values kindproduct name"))
+	// }
 
 	// creadndo el nuevo kind en la BBDD
-	err := models.NewProductKind(strings.TrimSpace(body.Name))
+	err := models.NewProductKind(strings.TrimSpace(body.Name), idShop)
 	if err != nil {
 		return c.JSON(500, config.SetResError(500, "Error: No creado un KindProduct", err.Error()))
 	}

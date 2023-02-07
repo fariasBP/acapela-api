@@ -19,7 +19,7 @@ type (
 	}
 	bodyNotifyMsg struct {
 		Msg       string `json:"msg"`
-		NotReaded int    `json:"not_readed"`
+		NotReaded bool   `json:"not_readed"`
 	}
 )
 
@@ -30,7 +30,7 @@ func NotifyNewProductsWp(c echo.Context) error {
 	_ = json.NewDecoder(d).Decode(body)
 	defer d.Close()
 	// obteniendo usuarios
-	users, err := models.GetPhoneAndNameForNotificationsFromClientsByNotReaded(body.NotReaded)
+	users, err := models.GetPhoneAndNameUsersByNotReaded(body.NotReaded)
 	if err != nil {
 		return c.JSON(500, config.SetResError(500, "Error: No se pudo obtener a los usuarios, para enviar la notificacion de nuevos productos", err.Error()))
 	}

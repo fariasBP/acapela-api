@@ -2,7 +2,6 @@ package models
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/fariasBP/acapela-api/src/config"
@@ -15,7 +14,7 @@ import (
 func AdminEmployRegistrar(name string, phone int) error {
 	// Valores del Usuario
 	nUserRegister := &User{
-		Name:       strings.ToLower(strings.TrimSpace(name)),
+		Name:       name,
 		Rol:        2,
 		Phone:      phone,
 		CreateDate: time.Now(),
@@ -35,7 +34,7 @@ func AdminEmployRegistrar(name string, phone int) error {
 func EmployRegistrar(name string, phone int) error {
 	// valores de usuario
 	nUserRegister := &User{
-		Name:       strings.ToLower(strings.TrimSpace(name)),
+		Name:       name,
 		Rol:        3,
 		Phone:      phone,
 		CreateDate: time.Now(),
@@ -43,7 +42,6 @@ func EmployRegistrar(name string, phone int) error {
 	}
 	// conectando a la BBDD
 	ctx, client, coll := config.ConnectColl("users")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 	// insertando
 	_, err := coll.InsertOne(ctx, nUserRegister)
@@ -55,7 +53,7 @@ func EmployRegistrar(name string, phone int) error {
 func ClientRegistrar(name string, phone int) error {
 	// valores de usuario
 	nUserRegister := &User{
-		Name:       strings.ToLower(strings.TrimSpace(name)),
+		Name:       name,
 		Rol:        4,
 		Phone:      phone,
 		CreateDate: time.Now(),
@@ -75,7 +73,7 @@ func ClientRegistrar(name string, phone int) error {
 // func AutoClientRegistrar(name string, phone int) error {
 // 	// valores de usuario
 // 	nUserRegister := &User{
-// 		Name:       strings.ToLower(strings.TrimSpace(name)),
+// 		Name:       name,
 // 		Rol:        4,
 // 		Phone:      phone,
 // 		CreateDate: time.Now(),
@@ -88,12 +86,12 @@ func ClientRegistrar(name string, phone int) error {
 // 	// insertando
 // 	_, err := coll.InsertOne(ctx, nUserRegister)
 
-// 	return err
-// }
+//		return err
+//	}
 func AutoClientRegistrar(phone int, name string) error {
 	// valores del usuario
 	nUserRegister := &User{
-		Name:               strings.ToLower(strings.TrimSpace(name)),
+		Name:               name,
 		Rol:                4,
 		Phone:              phone,
 		CreateDate:         time.Now(),
@@ -115,9 +113,9 @@ func AutoClientRegistrar(phone int, name string) error {
 func CreateAdminBoss(name, lastname, email string, phone int) error {
 	// valores del super usuario
 	nUser := &User{
-		Name:       strings.ToLower(strings.TrimSpace(name)),
-		Lastname:   strings.ToLower(strings.TrimSpace(name)),
-		Email:      strings.TrimSpace(email),
+		Name:       name,
+		Lastname:   name,
+		Email:      email,
 		Rol:        1,
 		Phone:      phone,
 		CreateDate: time.Now(),

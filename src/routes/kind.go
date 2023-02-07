@@ -10,7 +10,7 @@ func KindRoute(e *echo.Echo) {
 	e.GET("kinds/all", controllers.GetAllKinds)
 	router := e.Group("kinds", middlewares.ValidateToken)
 	router.POST("/create", controllers.CreateKind,
-		middlewares.IsBossOrAdmin, middlewares.KindValidate)
+		middlewares.IsOwnerShop, middlewares.KindValidate)
 	router.PUT("/update", controllers.UpdateNameKind,
 		middlewares.IsBoss, middlewares.KindUpdateNameValidate)
 	router.DELETE("/delete", controllers.DeleteKind,

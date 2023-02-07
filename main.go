@@ -35,6 +35,8 @@ func main() {
 	// validador
 	e.Validator = &CustomValidator{validator: validator.New()}
 	// estableciendo rutas
+	routes.PermissionRoute(e)
+	routes.ShopRoute(e)
 	routes.IndexRoute(e)
 	routes.AuthRoute(e)
 	routes.User(e)

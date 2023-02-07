@@ -2,22 +2,43 @@ package models
 
 import (
 	"context"
+	"time"
 
 	"github.com/fariasBP/acapela-api/src/config"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"gopkg.in/mgo.v2/bson"
 )
 
-type ProductModel struct {
-	ID   primitive.ObjectID `json:"id" bson:"_id,omitempty"`
-	Name string             `json:"name" bson:"name,omitempty"`
-	Kind string             `json:"kind" bson:"kind,omitempty"`
-}
+/*
+ID: identificador establecido por mongodb
+Nam: nombre de modelo
+*/
+type (
+	ProductModel struct {
+		ID           primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+		Name         string             `json:"name" bson:"name,omitempty"`
+		Creator      string             `json:"creator" bson:"creator,omitempty"`
+		Kind         string             `json:"kind" bson:"kind,omitempty"`
+		Photos       []string           `json:"photos" bson:"photos,omitempty"`
+		Verification bool               `json:"verification" bson:"verification,omitempty"`
+		Descripttion string             `json:"description" bson:"description,omitempty"`
+		Suscriptions int                `json:"suscriptions" bson:"suscriptions,omitempty"`
+		Messures     MessuresModel
+		CreateDate   time.Time `json:"create_date" bson:"create_date,omitempty"`
+		UpdateDate   time.Time `json:"update_date" bson:"update_date,omitempty"`
+	}
+	MessuresModel struct {
+		Name string // aun no esta pensado bien
+	}
+)
 
-func NewProductModel(name string, idKind string) error {
+func NewProductModel(name, creator, idKind string) error {
 	newModel := &ProductModel{
-		Name: name,
-		Kind: idKind,
+		Name:       name,
+		Kind:       idKind,
+		Creator:    creator,
+		CreateDate: time.Now(),
+		UpdateDate: time.Now(),
 	}
 	// conectando a la BBDD
 	ctx, client, coll := config.ConnectColl("models")
@@ -26,6 +47,8 @@ func NewProductModel(name string, idKind string) error {
 	_, err := coll.InsertOne(context.Background(), newModel)
 	return err
 }
+
+// verifica si ya existe el nombre del modelo (true = existe)
 func ExistsNameProductModel(name string) (b bool) {
 	ctx, client, coll := config.ConnectColl("models")
 	defer client.Disconnect(ctx)
