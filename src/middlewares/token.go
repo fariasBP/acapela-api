@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/fariasBP/acapela-api/src/config"
@@ -23,7 +24,17 @@ func CreateToken(id string, rol uint8) (string, time.Time, error) {
 		secretVal = "secreto"
 	}
 
-	expiresJWT := time.Now().Add(2 * 24 * time.Hour)
+	// obteniendo la duracion del token y convirtiendo
+	durationTknAuth, defined := os.LookupEnv("TOKEN_AUTH_DURATION")
+	if !defined {
+		durationTknAuth = "30"
+	}
+	durationTknAuthInt, err := strconv.Atoi(durationTknAuth)
+	if err != nil {
+		durationTknAuthInt = 30
+	}
+
+	expiresJWT := time.Now().Add(time.Duration(durationTknAuthInt) * 24 * time.Hour)
 	secret := []byte(secretVal)
 	claims := &JwtCustomClaims{
 		id,
