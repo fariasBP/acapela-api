@@ -7,27 +7,26 @@ import (
 	"strings"
 
 	"github.com/fariasBP/acapela-api/src/config"
-	"github.com/fariasBP/acapela-api/src/models"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 )
 
 type (
 	// validations
-	loginValidations struct {
+	LoginParams struct {
 		Phone int    `json:"phone" validate:"required,gt=1000"`
 		Code  string `json:"code" validate:"required,min=5,max=5"`
 	}
-	registerValidations struct {
+	RegisterParams struct {
 		Name  string `json:"name" validate:"required,lowercase,min=3"`
 		Phone int    `json:"phone" validate:"required,number,gt=1000"`
 	}
-	registerWpValidations struct {
+	RegisterWpParams struct {
 		Phone int `json:"phone" validate:"required,number,gt=1000"`
 	}
-	getCodeValidations struct {
-		CodePhone int `json:"code_phone" validate:"required,number,gte=1,lte=1000"`
-		Phone     int `json:"phone" validate:"required,number,gt=1000"`
+	GetCodeParams struct {
+		// CodePhone int `json:"code_phone" validate:"required,number,gte=1,lte=1000"`
+		Phone int `json:"phone" validate:"required,number,gt=1000"`
 	}
 
 	//VALUES
@@ -42,12 +41,12 @@ type (
 func LoginValidate(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// obteniendo body json
-		body := &models.User{}
+		body := &LoginParams{}
 		data, _ := ioutil.ReadAll(c.Request().Body)
 		reader := bytes.NewReader(data)
 		_ = json.NewDecoder(reader).Decode(body)
 		// estableciendo los argumentos de validacion
-		v := &loginValidations{
+		v := &LoginParams{
 			Phone: body.Phone,
 			Code:  strings.TrimSpace(body.Code),
 		}
@@ -66,12 +65,12 @@ func LoginValidate(next echo.HandlerFunc) echo.HandlerFunc {
 func RegisterValidator(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// obteniendo body json
-		body := &models.User{}
+		body := &RegisterParams{}
 		data, _ := ioutil.ReadAll(c.Request().Body)
 		reader := bytes.NewReader(data)
 		_ = json.NewDecoder(reader).Decode(body)
 		// estableciendo los argumentos de validacion
-		v := &registerValidations{
+		v := &RegisterParams{
 			Name:  strings.TrimSpace(body.Name),
 			Phone: body.Phone,
 		}
@@ -90,12 +89,12 @@ func RegisterValidator(next echo.HandlerFunc) echo.HandlerFunc {
 func RegisterWpValidator(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// obteniendo body json
-		body := &models.User{}
+		body := &RegisterWpParams{}
 		data, _ := ioutil.ReadAll(c.Request().Body)
 		reader := bytes.NewReader(data)
 		_ = json.NewDecoder(reader).Decode(body)
 		// estableciendo los argumentos de validacion
-		v := &registerWpValidations{
+		v := &RegisterWpParams{
 			Phone: body.Phone,
 		}
 		// realizando valdacion
@@ -113,12 +112,12 @@ func RegisterWpValidator(next echo.HandlerFunc) echo.HandlerFunc {
 func GetCodeValidate(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// obteniendo body json
-		body := &models.User{}
+		body := &GetCodeParams{}
 		data, _ := ioutil.ReadAll(c.Request().Body)
 		reader := bytes.NewReader(data)
 		_ = json.NewDecoder(reader).Decode(body)
 		// estableciendo los argumentos de validacion
-		v := &getCodeValidations{
+		v := &GetCodeParams{
 			Phone: body.Phone,
 		}
 		// realizando valdacion

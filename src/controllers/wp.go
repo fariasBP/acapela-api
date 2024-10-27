@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strconv"
 	"time"
 
@@ -11,59 +10,7 @@ import (
 	"github.com/fariasBP/acapela-api/src/middlewares"
 	"github.com/fariasBP/acapela-api/src/models"
 	"github.com/labstack/echo/v4"
-	"github.com/sethvargo/go-password/password"
 )
-
-// ---- enviar codigo ----
-func SendCodeWpAndEmail(c echo.Context) error {
-	// obteniendo variables
-	body := &models.User{}
-	d := c.Request().Body
-	_ = json.NewDecoder(d).Decode(body)
-	defer d.Close()
-	// verificando si existe el usuario
-	user, err := models.GetUserByPhone(body.Phone)
-	if err != nil {
-		middlewares.SendDefaultMsgRegistration(strconv.Itoa(body.Phone))
-		return c.JSON(400, config.SetRes(400, "Error: no existe el numero de telefono"))
-	}
-	// verificar si ha pasado 1 hora
-	if time.Now().UTC().After(user.CodeDate.Add(time.Hour)) {
-		// creando codigo
-		cod, err := password.Generate(5, 2, 0, true, false)
-		if err != nil {
-			middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se pudo generar el codigo")
-			return c.JSON(500, config.SetResError(500, "Error: al crear codigo", err.Error()))
-		}
-		// insertando code a user
-		_, err = models.SetCodeByPhone(body.Phone, cod)
-		if err != nil {
-			middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se pudo generar el codigo")
-			return c.JSON(500, config.SetResError(500, "Error: al insertar codigo a BBDD", err.Error()))
-		}
-		// enviar mensaje del codigo por email
-		if user.Email != "" {
-			// err := middlewares.SendEmailCodeTemplate(user.Name, user.Email, "assets/templates/emailTemplate.html", cod)
-			err := middlewares.SendEmailBody(user.Name, user.Email, "Hola "+user.Name+". Tu codigo es: "+cod)
-			if err != nil {
-				log.Printf("No se envio el correo electronio con el codigo por el siguiente motivo: %s\n", err)
-			}
-		}
-		// enviar mensaje del codigo por whatsapp
-		err = middlewares.SendCodeMessage(strconv.Itoa(body.Phone), cod)
-		if err != nil {
-			return c.JSON(500, config.SetResError(500, "Error: al enviar codigo via whatsapp", err.Error()))
-		}
-
-		return c.JSON(200, config.SetRes(200, "Codigo creado"))
-	}
-	middlewares.SendAnyMessageText(strconv.Itoa(body.Phone), "No se puede enviar el código por que ya ha solicitado uno, espere 1 hora para solicitar otro código.")
-	err = middlewares.SendEmailBody(user.Name, user.Email, "Hola "+user.Name+". Tu no puedes recibir otro codigo por que ya has solicitado uno")
-	if err != nil {
-		log.Printf("No se envio el correo electronio con el codigo por el siguiente motivo: %s\n", err)
-	}
-	return c.JSON(400, config.SetRes(400, "Error: No se puede enviar el codigo por que ya se ha solicitado uno"))
-}
 
 // ---- UTILITARIOS ----
 // ---- enviar link de facebook ----

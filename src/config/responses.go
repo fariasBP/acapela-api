@@ -2,6 +2,9 @@ package config
 
 import "time"
 
+const Id = "id"
+const Shop = "shop"
+
 type (
 	Res struct {
 		Code int    `json:"code"`
@@ -16,6 +19,12 @@ type (
 		Code int         `json:"code"`
 		Msg  string      `json:"msg"`
 		Data interface{} `json:"data"`
+	}
+	resJsonCount struct {
+		Code  int         `json:"code"`
+		Msg   string      `json:"msg"`
+		Data  interface{} `json:"data"`
+		Count int64       `json:"count"`
 	}
 	resToken struct {
 		Code    int       `json:"code"`
@@ -50,6 +59,17 @@ func SetResJson(code int, msg string, json interface{}) *resJson {
 	}
 	return d
 }
+
+func SetResJsonCount(code int, msg string, count int64, json interface{}) *resJsonCount {
+	d := &resJsonCount{
+		Code:  code,
+		Msg:   msg,
+		Data:  json,
+		Count: count,
+	}
+	return d
+}
+
 func SetResToken(code int, msg string, token string, expires time.Time) *resToken {
 	d := &resToken{
 		Code:    code,

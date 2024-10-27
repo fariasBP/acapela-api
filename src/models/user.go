@@ -24,11 +24,11 @@ type (
 		Code: codigo de ingreso del usuario (parecido a la contraseña que se genera automaticamente atravez de whatsapp o email)
 		Phone: numero de telefono del usuario {REQUERIDO}
 		Sleep: silenciar notificaciones
-			
+
 		NotReaded: Contador que indica cuantas veces el usuario no ha "recibido" sus mensajes recibidos
 			- 0: indica que el usuario ha recibido mensajes (no necesariamente los ha leido)
 			- >0 (mayor a cero): indica que el usuario no a recibido mensajes
-		
+
 
 	*/
 	User struct {
@@ -48,19 +48,20 @@ type (
 		Mailbox            string             `json:"mailbox" bson:"mailbox,omitempty"`
 		CountMailbox       int                `json:"count_mailbox" bson:"count_mailbox,omitempty"`
 		Suscriptions       []Suscription      `json:"suscriptions" bson:"suscriptions,omitempty"`
+		WaitingCloudinary  []string           `json:"waiting_cloudinary" bson:"waiting_cloudinary,omitempty"`
 		CreateDate         time.Time          `json:"create_date" bson:"create_date,omitempty"`
 		UpdateDate         time.Time          `json:"update_date" bson:"update_date,omitempty"`
 	}
 	/* suscription
 	IdShop: id de la tienda a la que se ha suscrito
-	LikesKind: tipos de prenda de preferencia del usuario que quiere que se le notifique (ej. abrigo y sacos)
+	LikesKind: Ids de los tipos de prenda de preferencia del usuario que quiere que se le notifique (ej. abrigo y sacos)
 	LikesGender: preferencia de dama o varon
 	LikesSize: preferencias de talla
 	*/
 	Suscription struct {
-		IdShop      string `json:"id_shop" bson:"id_shop,omitempty"`
-		LikesKind   string `json:"likes_kind" bson:"likes_kind,omitempty"`
-		LikesGender int8   `json:"likes_gender" bson:"likes_gender,omitempty"`
-		LikesSize   string `json:"likes_size" bson:"likes_size,omitempty"`
+		IdShop      string   `json:"id_shop" bson:"id_shop,omitempty"`
+		LikesKind   []string `json:"likes_kind" bson:"likes_kind,omitempty"`
+		LikesGender int8     `json:"likes_gender" bson:"likes_gender,omitempty"`
+		LikesSize   []string `json:"likes_size" bson:"likes_size,omitempty"`
 	}
 )

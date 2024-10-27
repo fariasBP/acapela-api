@@ -5,6 +5,7 @@ import (
 
 	"github.com/fariasBP/acapela-api/src/config"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -24,7 +25,8 @@ type (
 		Name        string             `json:"name" bson:"name,omitempty"`
 		Owner       string             `json:"owner" bson:"owner,omitempty"`
 		Admins      []Admin            `json:"admins" bson:"admins,omitempty"`
-		Description string             `json:"description" bson:"descripttion,omitempty"`
+		Description string             `json:"description" bson:"description,omitempty"`
+		Photo       string             `json:"photo" bson:"photo,omitempty"`
 		Status      int                `json:"status" bson:"status,omitempty"`
 		CreateDate  time.Time          `json:"create_date" bson:"create_date,omitempty"`
 		UpdateDate  time.Time          `json:"update_date" bson:"update_date,omitempty"`
@@ -57,6 +59,92 @@ func CreateShop(name, ownerId, description string) error {
 	return err
 }
 
+// obtener tienda
+func GetShop(idShop string) (*Shop, error) {
+	// conectando a la BBDD
+	ctx, client, coll := config.ConnectColl(dbShops)
+	defer client.Disconnect(ctx)
+	// convirtiendo id en ObjectId
+	objectId, err := primitive.ObjectIDFromHex(idShop)
+	if err != nil {
+		return nil, err
+	}
+	// consultando
+	// consultando
+	shop := &Shop{}
+	err = coll.FindOne(ctx, bson.M{"_id": objectId}).Decode(shop)
+	if err != nil {
+		return nil, err
+	}
+	return shop, nil
+}
+
+// obtener las tiendas
+func GetShops(name string, limit, page int) ([]Shop, int64, error) {
+	// conectando a la BBDD
+	ctx, client, coll := config.ConnectColl(dbShops)
+	defer client.Disconnect(ctx)
+	// creando parametros consulta
+	opts := options.Find().SetLimit(int64(limit)).SetSkip(int64(limit * (page - 1)))
+	query := bson.M{}
+	if name != "" {
+		query = bson.M{"name": primitive.Regex{
+			Pattern: `(\s` + name + `|^` + name + `|\w` + name + `\w` + `|` + name + `$` + `|` + name + `\s)`, Options: "i",
+		}}
+	}
+	// consultando cantidad de datos
+	count, err := coll.CountDocuments(ctx, query)
+	if err != nil {
+		return nil, 0, err
+	}
+	// consultando
+	cursor, err := coll.Find(ctx, query, opts)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer cursor.Close(ctx)
+	// modelando datos
+	var shops []Shop
+	if err = cursor.All(ctx, &shops); err != nil {
+		return nil, 0, err
+	}
+
+	return shops, count, nil
+}
+
+// obtener las tiendas
+func GetShopByOwner(ownerId, name string, limit, page int) ([]Shop, int64, error) {
+	// conectando a la BBDD
+	ctx, client, coll := config.ConnectColl(dbShops)
+	defer client.Disconnect(ctx)
+	// creando parametros consulta
+	opts := options.Find().SetLimit(int64(limit)).SetSkip(int64(limit * (page - 1)))
+	query := bson.M{"owner": ownerId}
+	if name != "" {
+		query = bson.M{"$and": []bson.M{
+			bson.M{"name": primitive.Regex{
+				Pattern: `(\s` + name + `|^` + name + `|\w` + name + `\w` + `|` + name + `$` + `|` + name + `\s)`, Options: "i",
+			}},
+			bson.M{"owner": ownerId},
+		}}
+	}
+	// consultando cantidad
+	count, err := coll.CountDocuments(ctx, query)
+	if err != nil {
+		return nil, 0, err
+	}
+	// consultando
+	cursor, err := coll.Find(ctx, query, opts)
+	defer cursor.Close(ctx)
+	// modelando datos
+	var shops []Shop
+	if err = cursor.All(ctx, &shops); err != nil {
+		return nil, 0, err
+	}
+
+	return shops, count, nil
+}
+
 // verificar si el nombre de la tienda ya existe (true = existe)
 func ExistsNameShop(name string) bool {
 	// conectando a la BBDD
@@ -71,7 +159,7 @@ func ExistsNameShop(name string) bool {
 }
 
 // verificar si existe la tienda (true = existe)
-func ExistsShopById(idShop string) bool {
+func ExistsShopByIdString(idShop string) bool {
 	// conectando a la BBDD
 	ctx, client, coll := config.ConnectColl(dbShops)
 	defer client.Disconnect(ctx)
@@ -131,3 +219,27 @@ func VerifyOwnerShop(idOwner string, idShop string) bool {
 
 	return shop.Owner == idOwner
 }
+
+// // ---- registrador de clientes ----
+// func ClientRegistrar(name string, phone int, idShop string) error {
+// 	// valores de usuario
+// 	nUserRegister := &User{
+// 		Name:       name,
+// 		Rol:        4,
+// 		Phone:      phone,
+// 		CreateDate: time.Now(),
+// 		UpdateDate: time.Now(),
+// 	}
+// 	nSuscription := &Suscription{
+// 		IdShop: idShop,
+
+// 	}
+// 	// conectando a BBDD
+// 	ctx, client, coll := config.ConnectColl("users")
+// 	defer fmt.Println("Disconnected DB")
+// 	defer client.Disconnect(ctx)
+// 	// insertando
+// 	_, err := coll.InsertOne(ctx, nUserRegister)
+
+// 	return err
+// }

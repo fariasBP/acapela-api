@@ -18,7 +18,10 @@ import (
 // SUBIENDO A CLAUDINARY
 func SendImageInCloudinary(file multipart.File) (*uploader.UploadResult, error) {
 	// otener variables de entorno
-	pathCld, _ := os.LookupEnv("FOLDER_PRODUCTS_CLOUDINARY")
+	pathCld, define := os.LookupEnv("FOLDER_PRODUCTS_CLOUDINARY")
+	if !define {
+		pathCld = "acapelashop/products"
+	}
 
 	// creando cliente cloudinary
 	ctx, cld := cloudinaryClient()
@@ -33,6 +36,21 @@ func SendImageInCloudinary(file multipart.File) (*uploader.UploadResult, error) 
 	}
 
 	return rss, nil
+}
+
+// Eliminando imagen de cloundinary
+func DestroyImageFromCloudinary(idImg string) error {
+	// creando cliente cloudinary
+	ctx, cld := cloudinaryClient()
+
+	// eliminando imagen
+	_, err := cld.Upload.Destroy(ctx, uploader.DestroyParams{PublicID: idImg})
+	if err != nil {
+		return err
+		// return c.JSON(500, config.SetResError(500, "no uploaded image", err.Error()))
+	}
+
+	return nil
 }
 
 func SendImageInSpaces(file *multipart.FileHeader) (string, error) {

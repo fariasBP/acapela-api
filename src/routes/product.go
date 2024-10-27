@@ -6,13 +6,14 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func Product(e *echo.Echo) {
-	e.GET("/product/all", controllers.GetAllProducts)
-	e.GET("/product/products", controllers.GetProducts)
-	e.GET("/product/newproducts", controllers.GetNewProducts)
-	router := e.Group("/product", middlewares.ValidateToken)
-	router.POST("/create", controllers.CreateProduct,
-		middlewares.IsBossOrAdmin, middlewares.CreateProductValidate)
-	router.PUT("/sell", controllers.SellProduct,
-		middlewares.IsBossOrAdminOrEmpl, middlewares.SellProductValidate)
+func Product(e *echo.Group) {
+	e.POST("/product/create", controllers.CreateProduct, middlewares.ValidateToken, middlewares.CreateProductValidate)
+	// e.GET("/product/all", controllers.GetAllProducts)
+	// e.GET("/product/products", controllers.GetProducts)
+	// e.GET("/product/newproducts", controllers.GetNewProducts)
+	// router := e.Group("/product", middlewares.ValidateToken)
+	// router.POST("/create", controllers.CreateProduct,
+	// middlewares.IsBossOrAdmin, middlewares.CreateProductValidate)
+	// router.PUT("/sell", controllers.SellProduct,
+	// middlewares.IsBossOrAdminOrEmpl, middlewares.SellProductValidate)
 }

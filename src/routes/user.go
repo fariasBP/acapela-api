@@ -6,13 +6,14 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func User(e *echo.Echo) {
+func User(e *echo.Group) {
 	// e.POST("/user", func(c echo.Context) error {
 	// 	return c.JSON(200, "sdfasdf")
 	// })
-	router := e.Group("user", middlewares.ValidateToken)
+	router := e.Group("/user", middlewares.ValidateToken)
 	// router.POST("", controllers.GetUser)
 	router.GET("/all", controllers.GetAllUsers)
 	router.PUT("/name", controllers.ChangeNameUserByPhone, middlewares.IsBossOrAdmin, middlewares.NameUserValidate)
 	router.GET("/profile", controllers.GetProfile)
+	router.PUT("/waitingcloudinary/create", controllers.AddWaitingCloudinaryImg)
 }

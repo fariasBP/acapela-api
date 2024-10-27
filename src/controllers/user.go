@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 
 	"github.com/fariasBP/acapela-api/src/config"
@@ -21,6 +22,9 @@ type (
 		Id  string `json:"id"`
 		Rol string `json:"rol"`
 	}
+	ImgIdParam struct {
+		IdImg string `json:"id_img"`
+	}
 )
 
 // func GetUser(c echo.Context) error {
@@ -33,8 +37,8 @@ type (
 // 		return c.JSON(400, config.SetResError(400, "error get user from models", err.Error()))
 // 	}
 
-// 	return c.JSON(200, config.SetResJson(200, "user recived info", user))
-// }
+//		return c.JSON(200, config.SetResJson(200, "user recived info", user))
+//	}
 func GetProfile(c echo.Context) error {
 	id := c.Get("id").(string)
 	// rol := c.Get("rol").(string)
@@ -245,4 +249,46 @@ func ChangeNameUserByPhone(c echo.Context) error {
 	}
 
 	return c.JSON(200, config.SetRes(200, "Se actulizo correctamente el usuario"))
+}
+
+// añade un idImg al array waiting_cloudinary
+func AddWaitingCloudinaryImg(c echo.Context) error {
+	// obteniendo variables
+	body := ImgIdParam{}
+	d := c.Request().Body
+	_ = json.NewDecoder(d).Decode(body)
+	defer d.Close()
+	// obteniendo id
+	id := c.Get("id").(string)
+	// consultando
+	err := models.AddWaitingCloudinaryImg(id, body.IdImg)
+	if err != nil {
+		return c.JSON(500, config.SetResError(500, "Error: No se puede crear waitingcloudinary img.", err.Error()))
+	}
+	return c.JSON(200, config.SetRes(200, "El waitingcloudinary img se creo correctamente."))
+}
+
+// elimina
+func RemoveAndDestroyWaitingCloudinaryImg(c echo.Context) error {
+	// obteniendo id
+	id := c.Get("id").(string)
+	// obteniendo usuario
+	user, err := models.GetUserByIDStr(id)
+	if err != nil {
+		return c.JSON(400, config.SetResError(400, "Error: No se puede obtener al usuario.", err.Error()))
+	}
+	// consultando
+	for _, v := range user.WaitingCloudinary {
+		err = middlewares.DestroyImageFromCloudinary(v)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+	// vaciando la lista
+	err = models.RemoveWaitingCloudinaryImg(id)
+	if err != nil {
+		return c.JSON(400, config.SetResError(400, "Error: No se puede remover la lista WaitingCloudinary.", err.Error()))
+	}
+
+	return c.JSON(200, config.SetRes(200, "El waitingcloudinary img se creo correctamente."))
 }

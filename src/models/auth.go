@@ -49,26 +49,6 @@ func EmployRegistrar(name string, phone int) error {
 	return err
 }
 
-// ---- registrador de clientes ----
-func ClientRegistrar(name string, phone int) error {
-	// valores de usuario
-	nUserRegister := &User{
-		Name:       name,
-		Rol:        4,
-		Phone:      phone,
-		CreateDate: time.Now(),
-		UpdateDate: time.Now(),
-	}
-	// conectando a BBDD
-	ctx, client, coll := config.ConnectColl("users")
-	defer fmt.Println("Disconnected DB")
-	defer client.Disconnect(ctx)
-	// insertando
-	_, err := coll.InsertOne(ctx, nUserRegister)
-
-	return err
-}
-
 // // ---- clientes auto registrados (que se registran solos) ----
 // func AutoClientRegistrar(name string, phone int) error {
 // 	// valores de usuario

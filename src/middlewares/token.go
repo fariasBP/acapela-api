@@ -16,6 +16,8 @@ type JwtCustomClaims struct {
 	jwt.StandardClaims
 }
 
+const ID_USER = "id"
+
 func CreateToken(id string, rol uint8) (string, time.Time, error) {
 	// obteniendo secret de variable de entorno
 	secretVal, defined := os.LookupEnv("SECRET_JWT")
@@ -103,6 +105,41 @@ func IsOwnerShop(next echo.HandlerFunc) echo.HandlerFunc {
 			return next(c)
 		}
 		return c.JSON(400, config.SetResError(400, "Error: Usted no es Owner.", "user id or store id are not related"))
+	}
+}
+
+// verificar si es superusuario
+func IsSuperUser(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		// obteniendo variables
+		id := c.Get("id").(string)
+		// consultando
+		user, err := models.GetUserByIDStr(id)
+		if err != nil {
+			return c.JSON(400, config.SetResError(400, "Error: el usuario no existe.", err.Error()))
+		}
+		// obteniendo variables .env
+		phone, defined := os.LookupEnv("INIT_PHONE_ADMIN")
+		if !defined {
+			return c.JSON(500, config.SetResError(500, "Error: no se pudo obtener variables .env", ""))
+		}
+		email, defined := os.LookupEnv("INIT_EMAIL_ADMIN")
+		if !defined {
+			return c.JSON(500, config.SetResError(500, "Error: no se pudo obtener variables .env", ""))
+		}
+		// convirtiendo valores
+		phoneInt, err := strconv.Atoi(phone)
+		if err != nil {
+			return c.JSON(500, config.SetResError(500, "Error: no se pudo convertir a entero", err.Error()))
+		}
+		if user.Phone != phoneInt {
+			return c.JSON(400, config.SetResError(400, "Error: no es un super usuario", ""))
+		}
+		if user.Email != email {
+			return c.JSON(400, config.SetResError(400, "Error: no es un super usuario", ""))
+
+		}
+		return next(c)
 	}
 }
 

@@ -13,27 +13,52 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+/*
+	Price >>> Precio del producto
+	Price >>> Precio minimo (con rebaja) del producto
+	Photos >>> url de las fotos del producto
+	model >>> id string del modelo del producto
+
+
+*/
+
+const (
+	Male   GenderVal = 1
+	Female GenderVal = 2
+	Both   GenderVal = 3
+)
+
+type (
+	GenderVal int8
+	SizeVal   string
+)
 type (
 	Product struct {
-		ID              primitive.ObjectID `json:"id" bson:"_id,omitempty"`
-		Price           int                `json:"price" bson:"price,omitempty"`
-		PriceMin        int                `json:"price_min" bson:"price_min,omitempty"`
-		Photos          []string           `json:"photos" bson:"photos,omitempty"`
-		Kind            string             `json:"kind" bson:"kind,omitempty"`
-		Models          []string           `json:"models" bson:"models,omitempty"`
-		Gender          int                `json:"gender" bson:"gender,omitempty"`
-		Size            []string           `json:"size" bson:"size,omitempty"`
-		ModelQuality    int                `json:"model_quality" bson:"model_quality,omitempty"`
-		MaterialQuality int                `json:"material_quality" bson:"material_quality,omitempty"`
-		NewPrice        int                `json:"new_price" bson:"new_price,omitempty"`
-		SellPrice       int                `json:"sell_price" bson:"sell_price,omitempty"`
-		Seller          string             `json:"seller" bson:"seller,omitempty"`
-		Buyer           string             `json:"buyer" bson:"buyer,omitempty"`
-		Day             int                `json:"day" bson:"day,omitempty"`
-		Month           time.Month         `json:"month" bson:"month,omitempty"`
-		Year            int                `json:"year" bson:"year,omitempty"`
-		CreateDate      time.Time          `json:"create_date" bson:"create_date,omitempty"`
-		UpdateDate      time.Time          `json:"update_date" bson:"update_date,omitempty"`
+		ID primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+		//basico
+		Models []string `json:"models" bson:"models"`
+		//cantidad (si es unico o por lote)
+		/* Quantity uint `json:"quantity" bson:"quantity"` */
+		//precio
+		Price    uint `json:"price" bson:"price"`
+		PriceMin uint `json:"price_min" bson:"price_min"`
+		NewPrice uint `json:"new_price" bson:"new_price"`
+		//fotos y apariencia
+		Photos []string `json:"photos" bson:"photos,omitempty"`
+		/* Colors []string `json:"colors" bson:"colors,omitempty"` */
+		//tamaño
+		Size []string `json:"size" bson:"size,omitempty"`
+		//genero
+		Gender GenderVal `json:"gender" bson:"gender,omitempty"`
+		//venta
+		SellPrice int    `json:"sell_price" bson:"sell_price,omitempty"`
+		Buyer     string `json:"buyer" bson:"buyer,omitempty"`
+		Seller    string `json:"seller" bson:"seller,omitempty"`
+		//tags (etiquetas)
+		/* Tags []string `json:"tags" bson:"tags,omitempty"` */
+
+		CreateDate time.Time `json:"create_date" bson:"create_date,omitempty"`
+		UpdateDate time.Time `json:"update_date" bson:"update_date,omitempty"`
 	}
 	Created struct {
 		LastCreated time.Time `json:"last_created" bson:"last_created,omitempty"`
@@ -58,37 +83,30 @@ modelquality - calidad del modelo
 materialquality - calidad del material ej./ 1/10 3/10, 10/10
 */
 
-func NewProduct(price, priceMin int, photos []string, kind string, models []string, gender int, size []string, modelQuality, materialQuality int) error {
+// crear producto
+func CreateProduct(models []string, price, priceMin uint, photos []string, gender GenderVal, size []string) error {
+	// creando nuevo producto
 	newProduct := &Product{
-		Price:           price,
-		PriceMin:        priceMin,
-		Photos:          photos,
-		Kind:            kind,
-		Models:          models,
-		Gender:          gender,
-		Size:            size,
-		ModelQuality:    modelQuality,
-		MaterialQuality: materialQuality,
-		Day:             time.Now().UTC().Day(),
-		Month:           time.Now().UTC().Month(),
-		Year:            time.Now().UTC().Year(),
-		CreateDate:      time.Now().UTC(),
-		UpdateDate:      time.Now().UTC(),
+		Models:     models,
+		Price:      price,
+		PriceMin:   priceMin,
+		Photos:     photos,
+		Gender:     gender,
+		Size:       size,
+		CreateDate: time.Now().UTC(),
+		UpdateDate: time.Now().UTC(),
 	}
 
+	// conectando a la BBDD
 	ctx, client, db := config.ConnectDB()
 	collProducts := db.Collection("products")
-	collApp := db.Collection("app")
 	defer client.Disconnect(ctx)
 
-	appName, _ := os.LookupEnv("APP_NAME")
-
+	// consultando
 	_, err := collProducts.InsertOne(ctx, newProduct)
 	if err != nil {
 		return err
 	}
-
-	_, err = collApp.UpdateOne(ctx, bson.M{"name": appName}, bson.M{"$set": bson.M{"set_products": time.Now().UTC()}})
 
 	return err
 }
@@ -202,7 +220,7 @@ func ExistProductId(id primitive.ObjectID) bool {
 	ctx, client, coll := config.ConnectColl("products")
 	defer client.Disconnect(ctx)
 	// consultando
-	productModel := &ProductModel{}
+	productModel := &ModelProduct{}
 	err := coll.FindOne(context.Background(), bson.M{"_id": id}).Decode(productModel)
 
 	return err == nil

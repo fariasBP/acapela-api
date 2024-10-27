@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func MessagesRoute(e *echo.Echo) {
+func MessagesRoute(e *echo.Group) {
 	router := e.Group("/messages", middlewares.ValidateToken)
 	router.POST("/send", controllers.SendMessageToUser, middlewares.IsBossOrAdmin)
 	router.POST("/user", controllers.GetUserMessages, middlewares.IsBossOrAdmin)

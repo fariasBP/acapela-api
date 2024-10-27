@@ -5,7 +5,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func WPRoute(e *echo.Echo) {
+func WPRoute(e *echo.Group) {
 	wp := e.Group("/wp")
 	wp.POST("/registration", controllers.RegistrationWp)
 	wp.POST("/code", controllers.SendCodeWpAndEmail)

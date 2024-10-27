@@ -16,47 +16,53 @@ type dat struct {
 	Code    int    `json:"code"`
 	Msg     string `json:"msg"`
 }
+type (
+	App struct {
+		Name       string `json:"name" bson:"name,omitempty"`
+		Developing bool   `json:"developing" bson:"developing,omitempty"`
+		Version    string `json:"version" bson:"version,omitempty"`
+	}
+)
 
+// Se obtiene los datos actuales de la app
+/* Por ejemplo:
+- version actual
+- si esta en desarrollo
+*/
 func DataApp(c echo.Context) error {
-	err, dat := models.GetDataApp()
+	// obteniendo dataapp de .env
+	name, defined := os.LookupEnv("NAMEAPP")
+	version, _ := os.LookupEnv("VERSIONAPP")
+	developing, _ := os.LookupEnv("DEVELOPINGMODE")
+	// convirtiendo valores
+	developingMode, err := strconv.ParseBool(developing)
 	if err != nil {
-		return c.JSON(500, config.SetResError(500, "No se puede obtener appData", err.Error()))
+		developingMode = false
 	}
-	return c.JSON(200, config.SetResJson(200, "se obtuvo los datos", dat))
-}
-
-func InfoWeb(c echo.Context) error {
-	// struct de la informacion web
-	u := &dat{
-		Appname: "Acapela",
-		Code:    200,
-		Msg:     "Hello World!!!",
-	}
-	// verificar si exista data app
-	existDaApp := models.ExistsAppData()
-	if !existDaApp {
-		err := models.CreateApp()
-		if err != nil {
-			return c.JSON(500, config.SetResError(500, "No se puede crear la app", err.Error()))
-		}
+	// valores
+	dat := &App{
+		Name:       name,
+		Version:    version,
+		Developing: developingMode,
 	}
 	// Verificar que no exista un superusuario
 	existSuper := models.ExistsAdiminBoss()
 	if existSuper {
-		return c.JSON(200, u)
+		// return c.JSON(200, u)
+		return c.JSON(200, config.SetResJson(200, "Ya se inicio la app.", dat))
 	}
 	// extayendo variables de entorno
 	valName, defined := os.LookupEnv("INIT_NAME_ADMIN")
 	if !defined {
-		valName = "alex"
+		valName = "franco"
 	}
 	valLastname, defined := os.LookupEnv("INIT_LASTNAME_ADMIN")
 	if !defined {
-		valLastname = "siniatra"
+		valLastname = "carvajal"
 	}
 	valEmail, defined := os.LookupEnv("INIT_EMAIL_ADMIN")
 	if !defined {
-		valEmail = "francoxxxcarvajal@gmail.com"
+		valEmail = "carvajalariasfelixfranco@gmail.com"
 	}
 	valPhone, defined := os.LookupEnv("INIT_PHONE_ADMIN")
 	if !defined {
@@ -72,31 +78,11 @@ func InfoWeb(c echo.Context) error {
 	if err != nil {
 		fmt.Println("No se ha creado el superusuraio")
 	}
-
 	// enviar el primer mensaje whatsapp
 	err = middlewares.SendWelcomeMessage(valPhone, valName)
 	if err != nil {
 		return c.JSON(200, config.SetResError(500, "Error: ususario fue registrado en BBDD pero no se envio el mensaje de bienvenida", err.Error()))
 	}
 
-	fmt.Println("El superusuario se ha creado")
-	return c.JSON(200, u)
-}
-
-func ChangeModeDev(c echo.Context) error {
-	err := models.UpdDevelopingApp(true)
-	if err != nil {
-		return c.JSON(500, config.SetResError(500, "Error: No se puede cambiar a modo dev", err.Error()))
-	}
-
-	return c.JSON(200, config.SetRes(200, "Se cambio a modo dev"))
-}
-
-func ChangeModeProd(c echo.Context) error {
-	err := models.UpdDevelopingApp(false)
-	if err != nil {
-		return c.JSON(500, config.SetResError(500, "Error: No se puede cambiar a modo prod", err.Error()))
-	}
-
-	return c.JSON(200, config.SetRes(200, "Se cambio a modo prod"))
+	return c.JSON(200, config.SetResJson(200, "Se creo superusuario y se inicio la app.", dat))
 }

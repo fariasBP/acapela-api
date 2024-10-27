@@ -5,35 +5,21 @@ import (
 	"strconv"
 
 	"github.com/fariasBP/acapela-api/src/config"
+	"github.com/fariasBP/acapela-api/src/middlewares"
 	"github.com/fariasBP/acapela-api/src/models"
 	"github.com/labstack/echo/v4"
 )
 
 func CreateProduct(c echo.Context) error {
 	// obteniendo variables
-	body := &models.Product{}
+	body := &middlewares.CreateProductParams{}
 	d := c.Request().Body
 	_ = json.NewDecoder(d).Decode(body)
 	defer d.Close()
 
-	//verificar ID de kind
-	exist := models.ExistKindIdString(body.Kind)
-	if !exist {
-		return c.JSON(400, config.SetResError(400, "Error: No existe un KindProduct ingresado", "Kindproduct does't exist"))
-	}
-
-	// verficar ID's de models
-	for _, v := range body.Models {
-		exist = models.ExistsModelIdString(v)
-		if !exist {
-			return c.JSON(400, config.SetResError(400, "Error: No existe un ModelProduct ingresado", "Modelproduct does't exist"))
-		}
-	}
-
 	// guardar nuevo producto en BBDD
-	err := models.NewProduct(body.Price, body.PriceMin, body.Photos,
-		body.Kind, body.Models, body.Gender, body.Size,
-		body.ModelQuality, body.MaterialQuality)
+	err := models.CreateProduct(body.Models, body.Price,
+		body.PriceMin, body.Photos, body.Gender, body.Size)
 	if err != nil {
 		return c.JSON(500, config.SetResError(500, "Error: not created product", err.Error()))
 	}

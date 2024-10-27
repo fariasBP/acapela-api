@@ -1,8 +1,8 @@
 package models
 
 import (
-	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/fariasBP/acapela-api/src/config"
@@ -10,20 +10,20 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+// app.go SE TIENE QUE ELIMINAR
 type (
 	App struct {
-		ID          primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+		ID          primitive.ObjectID `json:"id" bson:"_id,omitempty"` // a que elimnar
 		Name        string             `json:"name" bson:"name,omitempty"`
 		Developing  bool               `json:"developing" bson:"developing,omitempty"`
 		Version     string             `json:"version" bson:"version,omitempty"`
-		SetProducts time.Time          `json:"set_products" bson:"set_products,omitempty"`
+		SetProducts time.Time          `json:"set_products" bson:"set_products,omitempty"` // a que eliminar
 	}
 )
 
 func CreateApp() error {
 	// Conectando a la BBDD
 	ctx, client, coll := config.ConnectColl("app")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 	// obteniendo variables de entorno
 	name, _ := os.LookupEnv("APP_NAME")
@@ -39,24 +39,9 @@ func CreateApp() error {
 	return err
 }
 
-func ExistsAppData() bool {
-	// Conectando a la BBDD
-	ctx, client, coll := config.ConnectColl("app")
-	defer fmt.Println("Disconnected DB")
-	defer client.Disconnect(ctx)
-	// obteniendo variables de entorno
-	name, _ := os.LookupEnv("APP_NAME")
-	// consultando
-	vl := &App{}
-	err := coll.FindOne(ctx, bson.M{"name": name}).Decode(vl)
-
-	return err == nil
-}
-
 func UpdDevelopingApp(dev bool) error {
 	// Conectando a la BBDD
 	ctx, client, coll := config.ConnectColl("app")
-	defer fmt.Println("Disconnected DB")
 	defer client.Disconnect(ctx)
 
 	update := bson.M{"$set": bson.M{"developing": dev}}
@@ -67,13 +52,21 @@ func UpdDevelopingApp(dev bool) error {
 }
 
 func GetDataApp() (error, *App) {
-	// conectando a la BBDD
-	ctx, client, coll := config.ConnectColl("app")
-	defer fmt.Println("Disconnected DB")
-	defer client.Disconnect(ctx)
+	// obteniendo dataapp de .env
+	name, _ := os.LookupEnv("NAMEAPP")
+	version, _ := os.LookupEnv("VERSIONAPP")
+	developing, _ := os.LookupEnv("DEVELOPINGMODE")
+	// convirtiendo valores
+	developingMode, err := strconv.ParseBool(developing)
+	if err != nil {
+		developingMode = false
+	}
 	// obteniendo valores
-	dat := &App{}
-	err := coll.FindOne(ctx, bson.M{"name": "Acapela"}).Decode(dat)
+	dat := &App{
+		Name:       name,
+		Version:    version,
+		Developing: developingMode,
+	}
 
 	return err, dat
 }

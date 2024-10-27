@@ -9,6 +9,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+const (
+	DB_USER    = "users"
+	DB_TYPE    = "types"
+	DB_SUBTYPE = "subtypes"
+	DB_MODELS  = "models"
+)
+
 func Connect() (context.Context, *mongo.Client) {
 	// extrayendo variables de entorno
 	uri, define := os.LookupEnv("URI_MONGO_DB")

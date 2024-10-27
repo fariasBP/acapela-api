@@ -35,18 +35,21 @@ func main() {
 	// validador
 	e.Validator = &CustomValidator{validator: validator.New()}
 	// estableciendo rutas
-	routes.PermissionRoute(e)
-	routes.ShopRoute(e)
-	routes.IndexRoute(e)
-	routes.AuthRoute(e)
-	routes.User(e)
-	routes.Product(e)
-	routes.ModelRoute(e)
-	routes.KindRoute(e)
-	routes.Notification(e)
-	routes.WPRoute(e)
-	routes.Files(e)
-	routes.MessagesRoute(e)
+	router := e.Group("/api")
+	routes.IndexRoute(router)
+	routes.AuthRoute(router)
+	routes.TypeRoute(router)
+	routes.ShopRoute(router)
+	routes.SubTypeRoute(router)
+	// routes.PermissionRoute(router)
+	// routes.KindRoute(router)
+	routes.ModelRoute(router)
+	routes.Product(router)
+	routes.Files(router)
+	routes.User(router)
+	routes.Notification(router)
+	routes.WPRoute(router)
+	routes.MessagesRoute(router)
 	// iniciando server
 	err := godotenv.Load()
 	if err == nil {

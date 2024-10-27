@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func Notification(e *echo.Echo) {
+func Notification(e *echo.Group) {
 	router := e.Group("/notification", middlewares.ValidateToken)
 	router.POST("/newproducts", controllers.NotifyNewProductsWp, middlewares.IsBoss)
 }

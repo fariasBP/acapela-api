@@ -5,7 +5,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func PermissionRoute(e *echo.Echo) {
+func PermissionRoute(e *echo.Group) {
 
 	e.POST("/permissions/create", controllers.CreatePermission)
 }

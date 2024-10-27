@@ -14,16 +14,17 @@ import (
 )
 
 func UploadImage(c echo.Context) error {
-	cld, define := os.LookupEnv("CLOUD_IMG")
-	if !define {
-		cld = "cloudinary"
-	}
-	if cld == "cloudinary" {
-		return UploadImageToCloudinary(c)
-	} else if cld == "spaces" {
-		return UploadImageToSpaces(c)
-	}
-	return c.JSON(500, config.SetRes(500, "Error: No se sabe a que cloud se enviara la images."))
+	// cld, define := os.LookupEnv("CLOUD_IMG")
+	// if !define {
+	// 	cld = "cloudinary"
+	// }
+	// if cld == "cloudinary" {
+	// 	return UploadImageToCloudinary(c)
+	// } else if cld == "spaces" {
+	// 	return UploadImageToSpaces(c)
+	// }
+	// return c.JSON(500, config.SetRes(500, "Error: No se sabe a que cloud se enviara la images."))
+	return UploadImageToCloudinary(c)
 }
 
 func UploadImageToSpaces(c echo.Context) error {
