@@ -15,7 +15,7 @@ func UpdUserNameByPhone(phone int, name string) error {
 	defer client.Disconnect(ctx)
 	// consultando
 	update := bson.M{"$set": bson.M{"name": strings.ToLower(strings.TrimSpace(name)), "wp_registration": false}}
-	_, err := coll.UpdateOne(ctx, bson.M{"phone": phone}, update)
+	_, err := coll.UpdateOne(ctx, bson.M{"_id": phone}, update)
 
 	return err
 }
